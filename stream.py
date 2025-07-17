@@ -88,25 +88,31 @@ def download_from_bucket(id):
 
 def generate_stream():
     current_video, id, mp3_path, video_elapsed = get_current_video()
-    
     bytes_per_second = 16000
     start_byte = int(video_elapsed * bytes_per_second)
-    
     file_size = os.path.getsize(mp3_path)
-    start_byte = start_byte % file_size 
+    start_byte = start_byte % file_size
     
-    with open(mp3_path, 'rb') as f:
-        f.seek(start_byte)
-        
+    current_file = open(mp3_path, 'rb')
+    current_file.seek(start_byte)
+    
+    try:
         while True:
-            chunk = f.read(1024)
-            if not chunk:
-                f.seek(0)
-                chunk = f.read(1024)
+            chunk = current_file.read(1024)
+            if not chunk:  
+                current_file.close()
+                
+                current_video, id, mp3_path, video_elapsed = get_current_video()
+                current_file = open(mp3_path, 'rb')
+                current_file.seek(0)  
+                chunk = current_file.read(1024)
                 if not chunk:
                     break
+            
             yield chunk
             time.sleep(1024/bytes_per_second/10)
+    finally:
+        current_file.close()
 
 
 @app.route('/')
