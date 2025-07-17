@@ -115,37 +115,27 @@ def generate_stream():
     
     try:
         while True:
+            new_current_video, new_id, new_mp3_path, new_video_elapsed = get_current_video()
+            
+            if new_id != id:
+                current_file.close()
+                current_video = new_current_video
+                id = new_id
+                mp3_path = new_mp3_path
+                video_elapsed = new_video_elapsed
+                
+                start_byte = int(video_elapsed * bytes_per_second)
+                file_size = os.path.getsize(mp3_path)
+                start_byte = start_byte % file_size
+                
+                current_file = open(mp3_path, 'rb')
+                current_file.seek(start_byte)
+            
             chunk = current_file.read(1024)
             
             if not chunk:
                 current_file.close()
-                current_video, id, mp3_path, video_elapsed = get_current_video()
-                current_file = open(mp3_path, 'rb')
-                current_file.seek(0)  
-                chunk = current_file.read(1024)
-                
-                if not chunk:
-                    break
-            else:
-                new_current_video, new_id, new_mp3_path, new_video_elapsed = get_current_video()
-
-                if new_id != id:
-                    current_file.close()
-                    current_video = new_current_video
-                    id = new_id
-                    mp3_path = new_mp3_path
-                    video_elapsed = new_video_elapsed
-                    
-                    start_byte = int(video_elapsed * bytes_per_second)
-                    file_size = os.path.getsize(mp3_path)
-                    start_byte = start_byte % file_size
-                    
-                    current_file = open(mp3_path, 'rb')
-                    current_file.seek(start_byte)
-                    chunk = current_file.read(1024)
-                    
-                    if not chunk:
-                        break
+                continue
             
             yield chunk
             time.sleep(1024/bytes_per_second/10)
