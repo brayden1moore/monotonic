@@ -56,19 +56,24 @@ def get_current_video():
     next_video = ''
     mp3_path = ''
 
-    for k,v in video_dict.items():
-        time_sum += v['duration']
-
-        prev_video = video_list[video_list.index(k) - 1]
-        video = k
-        next_video = video_list[video_list.index(k) + 1]
-
-        title = v['title']
-        mp3_path = f'temp/{k}.mp3'
+    for k, v in video_dict.items():
 
         if time_sum + v['duration'] > time_into_iteration:
             video_elapsed = time_into_iteration - time_sum
+            video = k
+            title = v['title']
+            mp3_path = f'temp/{k}.mp3'
+            
+            video_index = video_list.index(k)
+            if video_index < len(video_list) - 1:
+                next_video = video_list[video_index + 1]
+            else:
+                next_video = video_list[0]
+            
+            prev_video = video_list[video_index - 1]
             break
+        
+        time_sum += v['duration']
 
     if os.path.exists(f'temp/{video}.mp3') == False:
         download_from_bucket(video)
@@ -111,17 +116,36 @@ def generate_stream():
     try:
         while True:
             chunk = current_file.read(1024)
-            new_current_video, id, mp3_path, video_elapsed = get_current_video()
-
-            if new_current_video != current_video:
+            
+            if not chunk:
                 current_file.close()
-                current_video = new_current_video
+                current_video, id, mp3_path, video_elapsed = get_current_video()
                 current_file = open(mp3_path, 'rb')
                 current_file.seek(0)  
                 chunk = current_file.read(1024)
                 
                 if not chunk:
                     break
+            else:
+                new_current_video, new_id, new_mp3_path, new_video_elapsed = get_current_video()
+
+                if new_id != id:
+                    current_file.close()
+                    current_video = new_current_video
+                    id = new_id
+                    mp3_path = new_mp3_path
+                    video_elapsed = new_video_elapsed
+                    
+                    start_byte = int(video_elapsed * bytes_per_second)
+                    file_size = os.path.getsize(mp3_path)
+                    start_byte = start_byte % file_size
+                    
+                    current_file = open(mp3_path, 'rb')
+                    current_file.seek(start_byte)
+                    chunk = current_file.read(1024)
+                    
+                    if not chunk:
+                        break
             
             yield chunk
             time.sleep(1024/bytes_per_second/10)
