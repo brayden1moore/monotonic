@@ -8,7 +8,7 @@ import tempfile
 import itertools
 import urllib.parse
 from datetime import datetime
-from flask import Flask, send_file, Response
+from flask import Flask, send_file, Response, redirect
 from concurrent.futures import ThreadPoolExecutor
 import threading
 
@@ -115,7 +115,7 @@ def generate_stream():
         current_file.close()
 
 
-@app.route('/')
+@app.route('/stream')
 def stream_mp3():
     return Response(
         generate_stream(),
@@ -127,6 +127,9 @@ def stream_mp3():
         }
     )
 
+@app.route('/')
+def hello():
+    return redirect("http://www.monotonic.studio/live", code=302)
 
 @app.route('/info')
 def get_info():
