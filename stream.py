@@ -7,6 +7,7 @@ import requests
 import tempfile
 import itertools
 import urllib.parse
+from bs4 import BeautifulSoup
 from datetime import datetime
 from flask import Flask, send_file, Response, redirect
 from concurrent.futures import ThreadPoolExecutor
@@ -86,25 +87,68 @@ def download_from_bucket(id):
         f.write(doc.content)
 
 
+def get_monotonic_live_link():
+    url = 'https://monotonic.studio/live'
+    try:
+        webpage = requests.get(url).text
+        soup = BeautifulSoup(webpage, 'html.parser')
+        iframes = soup.find_all('iframe')
+        for i in iframes:
+            if 'meshcast' in i['src']:
+                return i['src']
+    except Exception as e:
+        print(f"Error checking live link: {e}")
+    return None
+
+
+def stream_live_audio(live_url):
+    try:
+        response = requests.get(live_url, stream=True)
+        response.raise_for_status()
+        
+        for chunk in response.iter_content(chunk_size=1024):
+            if chunk:
+                yield chunk
+                if not get_monotonic_live_link():
+                    break
+    except Exception as e:
+        print(f"Error streaming live audio: {e}")
+
+
 def generate_stream():
+    live_link = get_monotonic_live_link()
+    if live_link:
+        yield from stream_live_audio(live_link)
+        return
+    
     current_video, id, mp3_path, video_elapsed = get_current_video()
     bytes_per_second = 16000
     start_byte = int(video_elapsed * bytes_per_second)
     file_size = os.path.getsize(mp3_path)
     start_byte = start_byte % file_size
-    
     current_file = open(mp3_path, 'rb')
     current_file.seek(start_byte)
     
+    last_live_check = time.time()
+    live_check_interval = 5.0 
+    
     try:
         while True:
+            current_time = time.time()
+            if current_time - last_live_check >= live_check_interval:
+                live_link = get_monotonic_live_link()
+                if live_link:
+                    current_file.close()
+                    yield from stream_live_audio(live_link)
+                    return
+                last_live_check = current_time
+            
             chunk = current_file.read(1024)
-            if not chunk:  
+            if not chunk:
                 current_file.close()
-                
                 current_video, id, mp3_path, video_elapsed = get_current_video()
                 current_file = open(mp3_path, 'rb')
-                current_file.seek(0)  
+                current_file.seek(0)
                 chunk = current_file.read(1024)
                 if not chunk:
                     break
