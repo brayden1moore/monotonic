@@ -111,13 +111,15 @@ def generate_stream():
     try:
         while True:
             chunk = current_file.read(1024)
-            if not chunk:  
+            new_current_video, id, mp3_path, video_elapsed = get_current_video()
+
+            if new_current_video != current_video:
                 current_file.close()
-                
-                current_video, id, mp3_path, video_elapsed = get_current_video()
+                current_video = new_current_video
                 current_file = open(mp3_path, 'rb')
                 current_file.seek(0)  
                 chunk = current_file.read(1024)
+                
                 if not chunk:
                     break
             
