@@ -3,11 +3,9 @@ import time
 import json
 import boto3
 import random
-import yt_dlp
 import requests
 import tempfile
 import itertools
-import scrapetube
 import urllib.parse
 from datetime import datetime
 from flask import Flask, send_file, Response
