@@ -26,6 +26,8 @@ app = Flask(__name__)
 from flask import Flask, Response, render_template_string
 
 def clear_temp():
+    if not os.path.exists('temp'):
+        os.mkdir('temp')
     temp_dir = os.listdir('temp')
     for file in temp_dir:
         os.remove(f'temp/{file}')
