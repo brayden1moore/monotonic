@@ -134,6 +134,7 @@ def generate_stream():
     
     try:
         while True:
+            '''
             current_time = time.time()
             if current_time - last_live_check >= live_check_interval:
                 live_link = get_monotonic_live_link()
@@ -143,6 +144,7 @@ def generate_stream():
                     yield from stream_live_audio(live_link)
                     return
                 last_live_check = current_time
+            '''
             
             chunk = current_file.read(1024)
             if not chunk:
