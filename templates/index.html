@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="icon" type="image/png" href="/favicon/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png" />
+    <link rel="manifest" href="/favicon/site.webmanifest"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <script src="https://kit.fontawesome.com/235894b977.js" crossorigin="anonymous"></script>    <title>Monotonic Radio</title>
+</head> 
+
+<body>
+  <div id="content">
+    <h1>MONOTONIC RADIO &nbsp; <span id="live-status">[ <img src="assets/hourglass.png" class="live-icon"></img> OFFLINE ]</span></h1>
+
+    <div id="stream-and-chat">
+      <div id="video">
+              <iframe src="https://meshcast.io/view.html?geo=usw2&id=FlatSide32838" class="stream"></iframe>
+      </div>
+      <iframe src="https://monotonicradio1.chatango.com/" style="border: none; width: 300px; height: 540px; transition-duration: initial;" class="scroll-transition-fade"></iframe>
+    </div>
+
+    <p class="message"> if it gets buggy, refresh </p>
+
+    <div id="link-grid">
+      <a class="icon-link" href="https://www.youtube.com/@MonotonicStudio" target="_blank"><img class="icon" src="assets/yt.png"></img></a>
+      <a class="icon-link" href="https://soundcloud.com/monotonicradio" target="_blank"><img class="icon" src="assets/sc.png"></img></a>
+      <a class="icon-link" href="https://www.instagram.com/monotonicradio/" target="_blank" ><img class="icon" src="assets/ig.png"></img></a>
+    </div>
+
+  </div>
+
+</body>
+
+<style>
+
+  #video {
+  position: relative;
+  width: 955px;
+  height: 540px;
+  }
+
+  #video iframe {
+    background-color: white;
+    border: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 955px;
+    height: 538px;
+  }
+
+  .live-icon {
+    position: relative;
+    top: 10px;
+    height: 50px;
+  }
+
+  #live-status {
+    font-family: 'Archivo Regular';
+  }
+  .message {
+    font-family: 'Arial';
+  }
+  #stream-and-chat {
+    margin-top: 50px;
+    justify-content: center;
+    display: flex;
+  }
+
+  #link-grid {
+    margin-top: 40px;
+    height: 65px;
+    display: flex;
+  }
+
+  .icon {
+    height: 100%;
+  }
+
+  .icon-link {
+    display: flex;
+    justify-content: center;
+    height: 100%;
+    margin:auto;
+    width: 33.33%;  
+}
+  #content { 
+    justify-items: center;
+    text-align: center;
+  }
+  h1 {
+    margin-top: 45px;
+    font-family: 'Archivo Semibold';
+    font-size: 38pt;
+  }
+  @font-face {
+      font-family: "Archivo SemiBold";
+      src: url("assets/Archivo-SemiBold.ttf") format("truetype");
+  }
+  @font-face {
+      font-family: "Archivo Regular";
+      src: url("assets/Archivo-Regular.ttf") format("truetype");
+  }
+</style>

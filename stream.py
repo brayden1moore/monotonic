@@ -9,7 +9,7 @@ import itertools
 import urllib.parse
 from bs4 import BeautifulSoup
 from datetime import datetime
-from flask import Flask, send_file, Response, redirect
+from flask import Flask, send_file, Response, redirect, render_template
 from concurrent.futures import ThreadPoolExecutor
 import threading
 
@@ -22,7 +22,7 @@ for k,v in video_dict.items():
 
 videos = list(video_dict.keys())
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='templates', static_folder='assets')
 
 from flask import Flask, Response, render_template_string
 
@@ -157,7 +157,8 @@ def stream_mp3():
 
 @app.route('/')
 def hello():
-    return redirect("http://www.monotonic.studio/live", code=302)
+    return render_template('index.html')
+    #return redirect("http://www.monotonic.studio/live", code=302)
 
 @app.route('/info')
 def get_info():
@@ -173,4 +174,4 @@ clear_temp()
 get_current_video()
 
 if __name__ == '__main__':
-    app.run(debug=True, port=888)
+    app.run(debug=True, port=8888)
