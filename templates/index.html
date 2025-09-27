@@ -26,7 +26,7 @@
       <audio id="audio" src="https://monotonicradio.com/stream"></audio><p id="now-playing">{{ now_playing }} (Re-Run)</p>
     </div>
     
-    <h1>MONOTONIC RADIO &nbsp;<br id="line-break"><span id="live-status-offline">[<img src="assets/hourglass.png" class="live-icon"></img>OFFLINE ]</span><span id="live-status-online">[<img src="assets/play.png" class="live-icon"></img>ONLINE ]</span></h1>
+    <div id="header">MONOTONIC RADIO &nbsp;<br id="line-break"><span id="live-status-offline">[<img src="assets/hourglass.png" class="live-icon"></img>OFFLINE ]</span><span id="live-status-online">[<img src="assets/play.png" class="live-icon"></img>ONLINE ]</span></div>
 
     <div id="stream-and-chat">
 
@@ -103,6 +103,7 @@
 
   #now-playing {
     font-family: 'Archivo SemiBold';
+    text-align: left;
   }
 
   #video iframe {
@@ -116,10 +117,10 @@
 
   .live-icon {
     position: relative;
-    top: 10px;
-    height: 50px;
-    margin-left: 10px;
-    margin-right: 10px;
+    top: 8px;
+    height: 35px;
+    margin-left: 5px;
+    margin-right: 5px;
   }
 
   #live-status {
@@ -155,10 +156,11 @@
   #content { 
     text-align: center;
   }
-  h1 {
+  #header {
     margin-top: 45px;
     font-family: 'Archivo Semibold';
-    font-size: 38pt;
+    font-size:24pt;
+    line-height: 0.5em;
   }
   @font-face {
       font-family: "Archivo SemiBold";
@@ -177,6 +179,15 @@
       }
       #chat {
         width: 300px;
+      }
+      #header {
+        font-size: 38pt;
+      }
+      .live-icon {
+        top: 10px;
+        height: 50px;
+        margin-left: 10px;
+        margin-right: 10px;
       }
     }
 </style>
