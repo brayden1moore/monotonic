@@ -157,7 +157,7 @@ def stream_mp3():
 
 @app.route('/')
 def hello():
-    return render_template('index.html')
+    return render_template('index.html', now_playing=get_current_video()[0])
     #return redirect("http://www.monotonic.studio/live", code=302)
 
 @app.route('/info')
