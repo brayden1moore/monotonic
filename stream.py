@@ -151,6 +151,7 @@ def generate_stream():
             
             with open(mp3_path, 'rb') as f:
                 f.seek(start_byte)
+                chunk_count = 0
                 
                 while True:
                     new_video, new_id, _, _ = get_current_video()
