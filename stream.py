@@ -9,7 +9,7 @@ import itertools
 import urllib.parse
 from bs4 import BeautifulSoup
 from datetime import datetime
-from flask import Flask, send_file, Response, redirect, render_template, CORS
+from flask import Flask, send_file, Response, redirect, render_template 
 from concurrent.futures import ThreadPoolExecutor
 import threading
 
@@ -23,7 +23,6 @@ for k,v in video_dict.items():
 videos = list(video_dict.keys())
 
 app = Flask(__name__, template_folder='templates', static_folder='assets')
-CORS(app, resources={r"/stream": {"origins": "*"}})
 
 from flask import Flask, Response, render_template_string
 
