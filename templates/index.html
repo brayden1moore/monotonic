@@ -237,7 +237,7 @@ if (streamLink && streamLink.trim() !== '') {
 
 const nowPlaying = document.getElementById('now-playing');
 function getUpdatedInfo() {
-      fetch('https://internetradioprotocol.org/info', {
+      fetch('https://monotonicradio.com/info', {
           method: 'GET'
       })
       .then(function(response) { return response.json(); })
