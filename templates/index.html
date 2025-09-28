@@ -235,4 +235,17 @@ if (streamLink && streamLink.trim() !== '') {
     play.style.display = 'flex';
 }
 
+const nowPlaying = document.getElementById('now-playing');
+function getUpdatedInfo() {
+      fetch('https://internetradioprotocol.org/info', {
+          method: 'GET'
+      })
+      .then(function(response) { return response.json(); })
+      .then(function(json) {
+          nowPlaying.innerHTML = json['now_playing'] + ' (Re-Run)'
+      });
+}
+
+setInterval(getUpdatedInfo, 15000);
+
 </script>
