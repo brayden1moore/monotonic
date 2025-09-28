@@ -135,6 +135,7 @@ def get_monotonic_live_link():
 def generate_stream():
     CHUNK_SIZE = 4096 
     BUFFER_SIZE = 16384 
+    INITIAL_CHUNKS = 3
     
     try:
         while True:
@@ -161,7 +162,11 @@ def generate_stream():
                         break
                         
                     yield chunk
-                    time.sleep(CHUNK_SIZE / bytes_per_second)
+
+                    if chunk_count < INITIAL_CHUNKS:
+                        chunk_count += 1
+                    else:
+                        time.sleep(CHUNK_SIZE / bytes_per_second)
                     
     except Exception as e:
         logger.error(f"Streaming error: {e}")
