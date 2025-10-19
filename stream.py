@@ -197,7 +197,7 @@ def stream_mp3():
         mimetype='audio/mpeg',
         headers={
             'Cache-Control': 'no-cache, no-store, must-revalidate',
-            'Accept-Ranges': 'none',  
+            'Accept-Ranges': 'none',   
             'Content-Type': 'audio/mpeg'
         }
     )
