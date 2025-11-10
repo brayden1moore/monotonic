@@ -91,20 +91,28 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-@lru_cache(maxsize=128)
-def download_from_bucket(id):
-    try:
-        url = f"https://scudbucket.sfo3.cdn.digitaloceanspaces.com/monotonic-radio/{id}.mp3"
-        response = requests.get(url, timeout=30)
-        response.raise_for_status()
-        
-        filepath = f'temp/{id}.mp3'
-        with open(filepath, 'wb') as f:
-            f.write(response.content)
+def download_from_bucket(id, max_retries=3):
+    filepath = f'temp/{id}.mp3'
+    if os.path.exists(filepath):
+        logger.info(f"File {id} already exists, skipping download")
         return True
-    except requests.RequestException as e:
-        logger.error(f"Failed to download {id}: {e}")
-        return False
+    
+    for attempt in range(max_retries):
+        try:
+            url = f"https://scudbucket.sfo3.cdn.digitaloceanspaces.com/monotonic-radio/{id}.mp3"
+            response = requests.get(url, timeout=30)
+            response.raise_for_status()
+            
+            with open(filepath, 'wb') as f:
+                f.write(response.content)
+            logger.info(f"Successfully downloaded {id}")
+            return True
+        except requests.RequestException as e:
+            logger.error(f"Attempt {attempt+1} failed to download {id}: {e}")
+            if attempt < max_retries - 1:
+                time.sleep(2 ** attempt) 
+    
+    return False
 
 def preload_files():
     while True:
