@@ -12,7 +12,6 @@ from datetime import datetime
 from flask import Flask, send_file, Response, redirect, render_template 
 from concurrent.futures import ThreadPoolExecutor
 import threading
-
 from flask_cors import CORS
 
 with open('videos.json', 'r') as f: 
@@ -160,7 +159,7 @@ preloader.start()
     
 def generate_stream():
     CHUNK_SIZE = 8192 
-    BUFFER_SIZE = 8192 
+    BUFFER_SIZE = 16384 
     INITIAL_CHUNKS = 10
 
     while True:
