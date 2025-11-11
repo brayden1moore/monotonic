@@ -47,7 +47,7 @@
                 <path d="M50 325A275 275 0 1 1 600 325A275 275 0 1 1 50 325"/>
             </clipPath>
         </defs>
-        <image href="{{ thumbnail }}" x="50" y="50" width="550" height="550" clip-path="url(#circle-clip)" preserveAspectRatio="xMidYMid slice"/>
+        <image class="thumbnail" href="{{ thumbnail }}" x="50" y="50" width="550" height="550" clip-path="url(#circle-clip)" preserveAspectRatio="xMidYMid slice"/>
         <path id="blue-circle" style="fill: rgb(74, 128, 255); opacity: 0.8;" d="M50 325A275 275 0 1 1 600 325A275 275 0 1 1 50 325"></path>
     </svg>
     <div class="circle-txt"><svg height="650" width="650">
@@ -67,7 +67,7 @@
                 <path d="M25 162.5A137.5 137.5 0 1 1 300 162.5A137.5 137.5 0 1 1 25 162.5"/>
             </clipPath>
         </defs>
-        <image href="{{ thumbnail }}" x="25" y="25" width="275" height="275" clip-path="url(#circle-clip-mobile)" preserveAspectRatio="xMidYMid slice"/>
+        <image class="thumbnail" href="{{ thumbnail }}" x="25" y="25" width="275" height="275" clip-path="url(#circle-clip-mobile)" preserveAspectRatio="xMidYMid slice"/>
         <path id="blue-circle-mobile" style="fill: rgb(74, 128, 255); opacity: 0.8;" d="M25 162.5A137.5 137.5 0 1 1 300 162.5A137.5 137.5 0 1 1 25 162.5"></path>
     </svg>
     <div class="circle-txt">
@@ -95,6 +95,10 @@
 </body>
 
 <style>
+
+.thumbnail {
+  animation: spin-reverse 120s linear infinite;
+}
 
 #circle {
   display: none;
