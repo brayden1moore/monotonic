@@ -459,7 +459,7 @@ function getUpdatedInfo() {
       .then(function(response) { return response.json(); })
       .then(function(json) {
           nowPlaying.innerHTML = json['now_playing'] + ' (Re-Run)';
-          const archiveText = "&nbsp;&nbsp;&nbsp; In the meantime, please enjoy Monotonic's Digital Archive Selection: " + json["now_playing"] + " " + "→".repeat(200);
+          const archiveText = "&nbsp;&nbsp;In the meantime, please enjoy Monotonic's Digital Archive Selection: " + json["now_playing"] + " " + "→".repeat(200);
           if (showText) showText.innerHTML = archiveText;
           if (showTextMobile) showTextMobile.innerHTML = archiveText;
       });
