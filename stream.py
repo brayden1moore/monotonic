@@ -109,27 +109,43 @@ def download_from_bucket(id, max_retries=3):
     
     return False
 
+def get_shuffled_playlist():
+    current_time = datetime.now()
+    beginning_time = datetime(year=2025, month=7, day=11, hour=9)
+    elapsed_seconds = (current_time - beginning_time).total_seconds()
+    iterations = int(elapsed_seconds // total_duration)
+    
+    shuffled_videos = videos.copy()
+    random.Random(iterations).shuffle(shuffled_videos)
+    
+    attempt = 0
+    while shuffled_videos[-1] == shuffled_videos[0] and attempt < 100:
+        random.Random(iterations + attempt + 1).shuffle(shuffled_videos)
+        attempt += 1
+    
+    return shuffled_videos
+
 def preload_files():
     while True:
         try:
             _, current_id, _, _ = get_current_video()
+            shuffled_videos = get_shuffled_playlist()
             
             if not os.path.exists(f'temp/{current_id}.mp3'):
-                logger.info(f"Preloader downloading current video: {current_id}")
+                logger.info(f"URGENT: Downloading current video {current_id}")
                 download_from_bucket(current_id)
             
-            video_list = list(video_dict.keys())
-            current_index = video_list.index(current_id)
-            for i in range(1, 4):  # Next 3 videos
-                next_index = (current_index + i) % len(video_list)
-                next_id = video_list[next_index]
+            current_index = shuffled_videos.index(current_id)
+            for i in range(1, 4):
+                next_id = shuffled_videos[(current_index + i) % len(shuffled_videos)]
                 if not os.path.exists(f'temp/{next_id}.mp3'):
-                    logger.info(f"Preloader downloading: {next_id}")
+                    logger.info(f"Preloading: {next_id}")
                     download_from_bucket(next_id)
             
-            time.sleep(10) 
+            time.sleep(10)
+            
         except Exception as e:
-            logger.error(f"Preloader error: {e}")
+            logger.error(f"Preloader crashed: {e}", exc_info=True)
             time.sleep(5)
 
 preloader = threading.Thread(target=preload_files, daemon=True)
