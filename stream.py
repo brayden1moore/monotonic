@@ -148,9 +148,9 @@ def get_mp3_bitrate(filepath):
     return audio.info.bitrate / 8
 
 def generate_stream():
-    CHUNK_SIZE = 8192 
-    BUFFER_SIZE = 16384 
-    INITIAL_CHUNKS = 3
+    CHUNK_SIZE = 4096 
+    BUFFER_SIZE = 8192 
+    INITIAL_CHUNKS = 2
     
     try:
         while True:
