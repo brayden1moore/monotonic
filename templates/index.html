@@ -458,7 +458,7 @@ function getUpdatedInfo() {
       })
       .then(function(response) { return response.json(); })
       .then(function(json) {
-          const remainingTime = Number(json['duration']) - Number(json['elaped']);
+          const remainingTime = Number(json['duration']) - Number(json['elapsed']);
           const endTime = new Date();
           console.log(endTime);
           console.log(remainingTime);
