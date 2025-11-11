@@ -60,6 +60,7 @@ def get_mp3_bitrate(filepath):
     ]
     result = subprocess.run(cmd, capture_output=True, text=True)
     data = json.loads(result.stdout)
+    logging.info(data)
     bitrate = int(data['streams'][0]['bit_rate'])
     return bitrate / 8
 
