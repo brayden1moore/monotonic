@@ -54,6 +54,7 @@ import mutagen.mp3
 
 
 def get_mp3_bitrate(filepath):
+    logging.info(filepath)
     cmd = [
         'ffprobe', '-v', 'quiet', '-print_format', 'json',
         '-show_streams', filepath
