@@ -28,26 +28,124 @@
     
     <div id="header">MONOTONIC RADIO &nbsp;<br id="line-break"><span id="live-status-offline">[<img src="assets/hourglass.png" class="live-icon"></img>OFFLINE ]</span><span id="live-status-online">[<img src="assets/play.png" class="live-icon"></img>ONLINE ]</span></div>
 
+    <div id="pemdas"><br>
+    <i></i>
+    </div>
+
     <div id="stream-and-chat">
 
       <div id="video"><iframe id="stream"  class="stream"></iframe></div>
       
       <iframe id="chat" src="https://monotonicradio1.chatango.com/" class="scroll-transition-fade"></iframe>
+      <p class="message"> if it gets buggy, refresh </p>
     </div>
 
-    <p class="message"> if it gets buggy, refresh </p>
+<div id="circle">
+    <svg height="650" width="650">
+        <defs>
+            <clipPath id="circle-clip">
+                <path d="M50 325A275 275 0 1 1 600 325A275 275 0 1 1 50 325"/>
+            </clipPath>
+        </defs>
+        <image href="{{ thumbnail }}" x="50" y="50" width="550" height="550" clip-path="url(#circle-clip)" preserveAspectRatio="xMidYMid slice"/>
+        <path id="blue-circle" style="fill: rgb(74, 128, 255); opacity: 0.8;" d="M50 325A275 275 0 1 1 600 325A275 275 0 1 1 50 325"></path>
+    </svg>
+    <div class="circle-txt"><svg height="650" width="650">
+        <path id="ellipse-id-r1" style="fill: none;" d="M25 325A300 300 0 1 1 625 325A300 300 0 1 1 25 325"></path>
+        <text><textPath xlink:href="#ellipse-id-r1"><tspan id="show-text">{{ now_playing }} →→→→ In the meantime, Please Enjoy Monotonic's Digital Archive Selection →→→→ {{ now_playing }} →→→→ In the meantime, Please Enjoy Monotonic's Digital Archive Selection →→→→ {{ now_playing }} →→→→ In the meantime, Please Enjoy Monotonic's Digital Archive Selection →→→→ </tspan></textPath></text>
+    </svg></div>
+    <div id="tune-in">
+        <svg id="play-icon-circle" xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><path fill="black" d="M50 3L3 97h94z"/></svg>
+      <svg id="pause-icon-circle" xmlns="http://www.w3.org/2000/svg" version="1.0" width="100" height="100" viewBox="0 0 1262.000000 1280.000000" preserveAspectRatio="xMidYMid meet"><g transform="translate(0.000000,1280.000000) scale(0.100000,-0.100000)" fill="#FFFFFF" stroke="none"><path d="M669 12214 c-59 -18 -130 -81 -160 -141 l-24 -48 0 -5650 0 -5650 23 -47 c13 -26 43 -65 67 -87 83 -77 -104 -71 2295 -71 2400 0 2212 -6 2295 71 24 23 54 62 67 87 l23 47 0 5650 0 5650 -23 47 c-13 25 -43 64 -67 87 -83 77 105 71 -2299 70 -1824 0 -2158 -3 -2197 -15z"/><path d="M7542 12211 c-63 -22 -123 -76 -155 -141 l-22 -45 0 -5650 0 -5650 23 -47 c13 -25 43 -64 67 -87 83 -77 -105 -71 2295 -71 2399 0 2212 -6 2295 71 24 22 54 61 67 87 l23 47 0 5650 0 5650 -24 48 c-31 63 -101 123 -164 142 -44 13 -321 15 -2201 15 -2062 -1 -2153 -1 -2204 -19z"/></g></svg>
 
+
+      </div>
+</div>
+    
+  </div>
+
+  <div class="footer">
     <div id="link-grid">
-      <a class="icon-link" href="https://www.youtube.com/@MonotonicStudio" target="_blank"><img class="icon" src="assets/yt.png"></img></a>
-      <a class="icon-link" href="https://soundcloud.com/monotonicradio" target="_blank"><img class="icon" src="assets/sc.png"></img></a>
-      <a class="icon-link" href="https://www.instagram.com/monotonicradio/" target="_blank" ><img class="icon" src="assets/ig.png"></img></a>
+        <a class="icon-link" href="https://www.youtube.com/@MonotonicStudio" target="_blank"><img class="icon" src="assets/yt.png"></img></a>
+        <a class="icon-link" href="https://soundcloud.com/monotonicradio" target="_blank"><img class="icon" style="height:90%; margin-top:-6px" src="assets/sc.png"></img></a>
+        <a class="icon-link" href="https://www.instagram.com/monotonicradio/" target="_blank" ><img class="icon" src="assets/ig.png"></img></a>
     </div>
-
   </div>
 
 </body>
 
 <style>
+
+#circle {
+  cursor: pointer;
+    position: fixed;
+    top: 54%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 650px;
+    height: 650px;
+}
+
+#circle > svg, #circle > .circle-txt {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+#tune-in {
+    position: absolute;
+    top: 49%;
+    left: 53%;
+    transform: translate(-50%, -50%);
+}
+
+  .circle-txt {
+  animation: spin 120s linear infinite;
+  }
+
+@keyframes spin {
+    to {
+        transform:rotate(1turn)
+    }
+}
+
+@keyframes spin-reverse {
+    to {
+        transform:rotate(-1turn)
+    }
+}
+
+.footer{
+    bottom: 0px;
+    position: fixed;
+    text-align: center ;
+    align-items: center;
+    font-size: 16px ;
+    font-family: verdana ;
+    width: 100% ;
+    height: 70px ;
+    background-color: #FFF ;
+    display: flex;
+    border-top: 1px solid black;
+    border-bottom: 1px solid black;
+}
+
+  #link-grid {
+    width: 100%;
+    margin-top: 20px;
+    height: 65px;
+    display: flex;
+    align-items: center;
+  }
+
+  body {
+    font-family: 'Archivo Regular';
+  }
+
+  #pemdas {
+    margin-top: 25px;
+    line-height: 1.35em;
+  }
 
   #live-status-online {
     display: none;
@@ -56,6 +154,17 @@
   #play-icon {
     transform: rotate(90deg);
     margin-right: 15px;
+  }
+
+  #play-icon-circle {
+    transform: rotate(90deg);
+    margin-right: 15px;
+  }
+
+
+  #pause-icon-circle {
+    display: none;
+    margin-right: 30px;
   }
 
   #pause-icon {
@@ -136,15 +245,8 @@
     display: block;
   }
 
-  #link-grid {
-    width: 100%;
-    margin-top: 40px;
-    height: 65px;
-    display: flex;
-  }
-
   .icon {
-    height: 70%;
+    height:  70%;
   }
 
   .icon-link {
@@ -201,7 +303,7 @@
         margin-right: 10px;
       }
       .icon {
-        height: 100%;
+        height: 70%;
       }
     }
 </style>
@@ -209,32 +311,46 @@
 <script>
 
 const play = document.getElementById('play');
+const circle = document.getElementById('circle');
 const audio = document.getElementById('audio');
 const pauseIcon = document.getElementById('pause-icon');
 const playIcon = document.getElementById('play-icon');
-play.addEventListener('click', ()=> {
+const pauseIconCircle = document.getElementById('pause-icon-circle');
+const playIconCircle = document.getElementById('play-icon-circle');
+const blueCircle = document.getElementById('blue-circle');
+
+function toggle() {
   if (!audio.paused) {
     audio.pause();
     playIcon.style.display = 'block';
     pauseIcon.style.display = 'none';
+    playIconCircle.style.display = 'block';
+    pauseIconCircle.style.display = 'none';
     play.style.background = 'rgb(74, 128, 255)';
     play.style.color = 'black';
+    blueCircle.style.opacity = 0.8;
   }
   else {
     audio.play();
     playIcon.style.display = 'none';
     pauseIcon.style.display = 'block';
+    playIconCircle.style.display = 'none';
+    pauseIconCircle.style.display = 'block';    
     play.style.background = 'black';
     play.style.color = 'white';
+    blueCircle.style.opacity = 0;
   }
-})
+}
+
+play.addEventListener('click',toggle);
+circle.addEventListener('click',toggle);
 
 const online = document.getElementById('live-status-online');
 const offline = document.getElementById('live-status-offline');
 const streamLink = document.getElementById('stream').src;
 console.log('Stream');
 console.log(streamLink);
-const video = document.getElementById('video');
+const video = document.getElementById('stream-and-chat');
 
 if (streamLink && streamLink.trim() !== '') {
     online.style.display = 'contents';
@@ -249,6 +365,8 @@ if (streamLink && streamLink.trim() !== '') {
 }
 
 const nowPlaying = document.getElementById('now-playing');
+const showText = document.getElementById('show-text');
+console.log(showText.textContent);
 function getUpdatedInfo() {
       fetch('https://monotonicradio.com/info', {
           method: 'GET'
@@ -256,9 +374,11 @@ function getUpdatedInfo() {
       .then(function(response) { return response.json(); })
       .then(function(json) {
           nowPlaying.innerHTML = json['now_playing'] + ' (Re-Run)'
+          showText.innerHTML = "In the meantime, PEMDAS: Please Enjoy Monotonic's Digital Archive Selection →→→→ " + json["now_playing"]
       });
 }
 
-setInterval(getUpdatedInfo, 15000);
+getUpdatedInfo();
+setInterval(getUpdatedInfo, 3000);
 
 </script>
