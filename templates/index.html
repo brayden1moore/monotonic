@@ -374,7 +374,7 @@ function getUpdatedInfo() {
       .then(function(response) { return response.json(); })
       .then(function(json) {
           nowPlaying.innerHTML = json['now_playing'] + ' (Re-Run)'
-          showText.innerHTML = "In the meantime, PEMDAS: Please Enjoy Monotonic's Digital Archive Selection →→→→ " + json["now_playing"]
+          showText.innerHTML = ("→→→→ In the meantime, Please Enjoy Monotonic's Digital Archive Selection: " + json["now_playing"]) * 3
       });
 }
 
