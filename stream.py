@@ -136,7 +136,6 @@ def download_from_bucket(id, max_retries=3):
     
     return False
 
-
 def preload_files():
     while True:
         try:
@@ -194,7 +193,6 @@ def stream_mp3():
             'Cache-Control': 'no-cache, no-store, must-revalidate',
             'Accept-Ranges': 'none',   
             'Content-Type': 'audio/mpeg',
-            'Transfer-Encoding': 'chunked'
         }
     )
 
