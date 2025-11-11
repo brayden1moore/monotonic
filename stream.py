@@ -34,27 +34,23 @@ def clear_temp():
         os.remove(f'temp/{file}')
 
 def get_current_video():
-
     # get time since start and set iteration seed
     current_time = datetime.now()
     beginning_time = datetime(year=2025, month=7, day=11, hour=9)
     elapsed_seconds = (current_time - beginning_time).total_seconds()
-    iterations = elapsed_seconds // total_duration
-
-    # shuffle with seed
+    iterations = int(elapsed_seconds // total_duration)
+    
     shuffled_videos = videos.copy()
     random.Random(iterations).shuffle(shuffled_videos)
-    while shuffled_videos[-1] == shuffled_videos[0]:
-        random.Random(iterations).shuffle(shuffled_videos)
-
-    # get video and time into video
+    
+    attempt = 0
+    while shuffled_videos[-1] == shuffled_videos[0] and attempt < 100:
+        random.Random(iterations + attempt + 1).shuffle(shuffled_videos)
+        attempt += 1
+    
     time_into_iteration = elapsed_seconds - (total_duration * iterations)
     time_sum = 0
-    video_elapsed = 0
-    video = ''
-    next_video = ''
-    mp3_path = ''
-
+    
     for i, video_id in enumerate(shuffled_videos):
         v = video_dict[video_id]
         
@@ -65,25 +61,23 @@ def get_current_video():
             next_video = shuffled_videos[(i + 1) % len(shuffled_videos)]
             prev_video = shuffled_videos[i - 1]
             
-            if not os.path.exists(f'temp/{video_id}.mp3'):
-                download_from_bucket(video_id)
+            if not os.path.exists(mp3_path):
+                logger.warning(f"Current video {video_id} not downloaded yet")
             if not os.path.exists(f'temp/{next_video}.mp3'):
-                download_from_bucket(next_video)
+                logger.warning(f"Next video {next_video} not downloaded yet")
+            
             if os.path.exists(f'temp/{prev_video}.mp3'):
-                os.remove(f'temp/{prev_video}.mp3')
+                try:
+                    os.remove(f'temp/{prev_video}.mp3')
+                except Exception as e:
+                    logger.error(f"Failed to remove {prev_video}: {e}")
             
             return v['title'], video_id, mp3_path, video_elapsed
         
         time_sum += v['duration']
-
-    if os.path.exists(f'temp/{video}.mp3') == False:
-        download_from_bucket(video)
-    if os.path.exists(f'temp/{next_video}.mp3') == False:
-        download_from_bucket(next_video)
-    if os.path.exists(f'temp/{prev_video}.mp3'):
-        os.remove(f'temp/{prev_video}.mp3')
-
-    return v['title'], video, mp3_path, video_elapsed
+    
+    logger.error("Failed to find current video in iteration")
+    return "", "", "", 0
 
 
 from functools import lru_cache
@@ -117,15 +111,26 @@ def download_from_bucket(id, max_retries=3):
 
 def preload_files():
     while True:
-        _, current_id, _, _ = get_current_video()
-        video_list = list(video_dict.keys())
-        current_index = video_list.index(current_id)
-        for i in range(1, 4):
-            next_index = (current_index + i) % len(video_list)
-            next_id = video_list[next_index]
-            if not os.path.exists(f'temp/{next_id}.mp3'):
-                download_from_bucket(next_id)
-        time.sleep(30)  
+        try:
+            _, current_id, _, _ = get_current_video()
+            
+            if not os.path.exists(f'temp/{current_id}.mp3'):
+                logger.info(f"Preloader downloading current video: {current_id}")
+                download_from_bucket(current_id)
+            
+            video_list = list(video_dict.keys())
+            current_index = video_list.index(current_id)
+            for i in range(1, 4):  # Next 3 videos
+                next_index = (current_index + i) % len(video_list)
+                next_id = video_list[next_index]
+                if not os.path.exists(f'temp/{next_id}.mp3'):
+                    logger.info(f"Preloader downloading: {next_id}")
+                    download_from_bucket(next_id)
+            
+            time.sleep(10) 
+        except Exception as e:
+            logger.error(f"Preloader error: {e}")
+            time.sleep(5)
 
 preloader = threading.Thread(target=preload_files, daemon=True)
 preloader.start()
