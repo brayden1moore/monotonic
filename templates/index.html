@@ -40,7 +40,7 @@
       <p class="message"> if it gets buggy, refresh </p>
     </div>
 
-<div id="circle">
+<div id="circle" >
     <svg height="650" width="650">
         <defs>
             <clipPath id="circle-clip">
@@ -57,9 +57,29 @@
     <div id="tune-in">
         <svg id="play-icon-circle" xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><path fill="white" style="border:1px solid black" d="M50 3L3 97h94z"/></svg>
       <svg id="pause-icon-circle" xmlns="http://www.w3.org/2000/svg" version="1.0" width="100" height="100" viewBox="0 0 1262.000000 1280.000000" preserveAspectRatio="xMidYMid meet"><g transform="translate(0.000000,1280.000000) scale(0.100000,-0.100000)" fill="#FFFFFF" stroke="none"><path d="M669 12214 c-59 -18 -130 -81 -160 -141 l-24 -48 0 -5650 0 -5650 23 -47 c13 -26 43 -65 67 -87 83 -77 -104 -71 2295 -71 2400 0 2212 -6 2295 71 24 23 54 62 67 87 l23 47 0 5650 0 5650 -23 47 c-13 25 -43 64 -67 87 -83 77 105 71 -2299 70 -1824 0 -2158 -3 -2197 -15z"/><path d="M7542 12211 c-63 -22 -123 -76 -155 -141 l-22 -45 0 -5650 0 -5650 23 -47 c13 -25 43 -64 67 -87 83 -77 -105 -71 2295 -71 2399 0 2212 -6 2295 71 24 22 54 61 67 87 l23 47 0 5650 0 5650 -24 48 c-31 63 -101 123 -164 142 -44 13 -321 15 -2201 15 -2062 -1 -2153 -1 -2204 -19z"/></g></svg>
-
-
       </div>
+</div>
+
+<div id="circle-mobile">
+    <svg height="325" width="325">
+        <defs>
+            <clipPath id="circle-clip-mobile">
+                <path d="M25 162.5A137.5 137.5 0 1 1 300 162.5A137.5 137.5 0 1 1 25 162.5"/>
+            </clipPath>
+        </defs>
+        <image href="{{ thumbnail }}" x="25" y="25" width="275" height="275" clip-path="url(#circle-clip-mobile)" preserveAspectRatio="xMidYMid slice"/>
+        <path id="blue-circle-mobile" style="fill: rgb(74, 128, 255); opacity: 0.8;" d="M25 162.5A137.5 137.5 0 1 1 300 162.5A137.5 137.5 0 1 1 25 162.5"></path>
+    </svg>
+    <div class="circle-txt">
+        <svg height="325" width="325">
+            <path id="ellipse-id-mobile" style="fill: none;" d="M12.5 162.5A150 150 0 1 1 312.5 162.5A150 150 0 1 1 12.5 162.5"></path>
+            <text><textPath xlink:href="#ellipse-id-mobile"><tspan id="show-text-mobile">{{ now_playing }} →→→ In the meantime, Please Enjoy Monotonic's Digital Archive Selection →→→ {{ now_playing }} →→→ In the meantime, Please Enjoy Monotonic's Digital Archive Selection →→→ {{ now_playing }} →→→ In the meantime, Please Enjoy Monotonic's Digital Archive Selection →→→ </tspan></textPath></text>
+        </svg>
+    </div>
+    <div id="tune-in">
+        <svg id="play-icon-circle-mobile" xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 100 100"><path fill="white" style="border:1px solid black" d="M50 3L3 97h94z"/></svg>
+        <svg id="pause-icon-circle-mobile" xmlns="http://www.w3.org/2000/svg" version="1.0" width="50" height="50" viewBox="0 0 1262.000000 1280.000000" preserveAspectRatio="xMidYMid meet"><g transform="translate(0.000000,1280.000000) scale(0.100000,-0.100000)" fill="#FFFFFF" stroke="none"><path d="M669 12214 c-59 -18 -130 -81 -160 -141 l-24 -48 0 -5650 0 -5650 23 -47 c13 -26 43 -65 67 -87 83 -77 -104 -71 2295 -71 2400 0 2212 -6 2295 71 24 23 54 62 67 87 l23 47 0 5650 0 5650 -23 47 c-13 25 -43 64 -67 87 -83 77 105 71 -2299 70 -1824 0 -2158 -3 -2197 -15z"/><path d="M7542 12211 c-63 -22 -123 -76 -155 -141 l-22 -45 0 -5650 0 -5650 23 -47 c13 -25 43 -64 67 -87 83 -77 -105 -71 2295 -71 2399 0 2212 -6 2295 71 24 22 54 61 67 87 l23 47 0 5650 0 5650 -24 48 c-31 63 -101 123 -164 142 -44 13 -321 15 -2201 15 -2062 -1 -2153 -1 -2204 -19z"/></g></svg>
+    </div>
 </div>
     
   </div>
@@ -77,31 +97,52 @@
 <style>
 
 #circle {
+  display: none;
   cursor: pointer;
-    position: fixed;
-    top: 54%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 650px;
-    height: 650px;
+  position: fixed;
+  top: 54%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 650px;
+  height: 650px;
+}
+
+#circle-mobile {
+  cursor: pointer;
+  position: fixed;
+  top: 54%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 325px;
+  height: 325px;
 }
 
 #circle > svg, #circle > .circle-txt {
-    position: absolute;
-    top: 0;
-    left: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 650px;
+  height: 650px;
+}
+
+#circle-mobile > svg, #circle-mobile > .circle-txt {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 325px;
+  height: 325px;
 }
 
 #tune-in {
-    position: absolute;
-    top: 49%;
-    left: 53%;
-    transform: translate(-50%, -50%);
+  position: absolute;
+  top: 49%;
+  left: 53%;
+  transform: translate(-50%, -50%);
 }
 
-  .circle-txt {
+.circle-txt {
   animation: spin 120s linear infinite;
-  }
+}
 
 @keyframes spin {
     to {
@@ -163,6 +204,17 @@
 
 
   #pause-icon-circle {
+    display: none;
+    margin-right: 30px;
+  }
+
+    #play-icon-circle-mobile {
+    transform: rotate(90deg);
+    margin-right: 15px;
+  }
+
+
+  #pause-icon-circle-mobile {
     display: none;
     margin-right: 30px;
   }
@@ -274,6 +326,14 @@
   }
     @media (orientation: landscape)  {
 
+      #circle-mobile {
+        display: none;
+      }
+
+      #circle {
+        display:block;
+      }
+
       #video iframe {
           width: 955px;
           height: 538px;
@@ -311,12 +371,16 @@
 
 const play = document.getElementById('play');
 const circle = document.getElementById('circle');
+const circleMobile = document.getElementById('circle-mobile');
 const audio = document.getElementById('audio');
 const pauseIcon = document.getElementById('pause-icon');
 const playIcon = document.getElementById('play-icon');
 const pauseIconCircle = document.getElementById('pause-icon-circle');
 const playIconCircle = document.getElementById('play-icon-circle');
+const pauseIconCircleMobile = document.getElementById('pause-icon-circle-mobile');
+const playIconCircleMobile = document.getElementById('play-icon-circle-mobile');
 const blueCircle = document.getElementById('blue-circle');
+const blueCircleMobile = document.getElementById('blue-circle-mobile');
 
 function toggle() {
   if (!audio.paused) {
@@ -325,9 +389,12 @@ function toggle() {
     pauseIcon.style.display = 'none';
     playIconCircle.style.display = 'block';
     pauseIconCircle.style.display = 'none';
+    playIconCircleMobile.style.display = 'block';
+    pauseIconCircleMobile.style.display = 'none';
     play.style.background = 'rgb(74, 128, 255)';
     play.style.color = 'black';
-    blueCircle.style.opacity = 0.8;
+    if (blueCircle) blueCircle.style.opacity = 0.8;
+    if (blueCircleMobile) blueCircleMobile.style.opacity = 0.8;
   }
   else {
     audio.play();
@@ -335,14 +402,18 @@ function toggle() {
     pauseIcon.style.display = 'block';
     playIconCircle.style.display = 'none';
     pauseIconCircle.style.display = 'block';    
+    playIconCircleMobile.style.display = 'none';
+    pauseIconCircleMobile.style.display = 'block';
     play.style.background = 'black';
     play.style.color = 'white';
-    blueCircle.style.opacity = 0;
+    if (blueCircle) blueCircle.style.opacity = 0;
+    if (blueCircleMobile) blueCircleMobile.style.opacity = 0;
   }
 }
 
-play.addEventListener('click',toggle);
-circle.addEventListener('click',toggle);
+play.addEventListener('click', toggle);
+if (circle) circle.addEventListener('click', toggle);
+if (circleMobile) circleMobile.addEventListener('click', toggle);
 
 const online = document.getElementById('live-status-online');
 const offline = document.getElementById('live-status-offline');
@@ -365,15 +436,19 @@ if (streamLink && streamLink.trim() !== '') {
 
 const nowPlaying = document.getElementById('now-playing');
 const showText = document.getElementById('show-text');
-console.log(showText.textContent);
+const showTextMobile = document.getElementById('show-text-mobile');
+console.log(showText ? showText.textContent : 'showText not found');
+
 function getUpdatedInfo() {
       fetch('https://monotonicradio.com/info', {
           method: 'GET'
       })
       .then(function(response) { return response.json(); })
       .then(function(json) {
-          nowPlaying.innerHTML = json['now_playing'] + ' (Re-Run)'
-          showText.innerHTML = (" →→→→→→→→→ In the meantime, Please Enjoy Monotonic's Digital Archive Selection: " + json["now_playing"]).repeat(3)
+          nowPlaying.innerHTML = json['now_playing'] + ' (Re-Run)';
+          const archiveText = " →→→→ In the meantime, Please Enjoy Monotonic's Digital Archive Selection: " + json["now_playing"];
+          if (showText) showText.innerHTML = archiveText.repeat(3);
+          if (showTextMobile) showTextMobile.innerHTML = archiveText.repeat(3);
       });
 }
 
