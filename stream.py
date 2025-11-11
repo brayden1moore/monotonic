@@ -13,6 +13,8 @@ from flask import Flask, send_file, Response, redirect, render_template
 from concurrent.futures import ThreadPoolExecutor
 import threading
 
+from flask_cors import CORS
+
 with open('videos.json', 'r') as f: 
     video_dict = json.load(f)
 
@@ -23,6 +25,7 @@ for k,v in video_dict.items():
 videos = list(video_dict.keys())
 
 app = Flask(__name__, template_folder='templates', static_folder='assets')
+CORS(app)
 
 from flask import Flask, Response, render_template_string
 
