@@ -458,8 +458,10 @@ function getUpdatedInfo() {
       })
       .then(function(response) { return response.json(); })
       .then(function(json) {
-          const remainingTime = json['duration'] - json['elaped'];
+          const remainingTime = Math.floor(['duration']) - Math.floor(json['elaped']);
           const endTime = new Date();
+          console.log(endTime);
+          console.log(remainingTime);
           endTime.setSeconds(endTime.getSeconds() + remainingTime);
           nowPlaying.innerHTML = json['now_playing'] + ' (Re-Run) | Until ' + endTime;
           const archiveText = "&nbsp;&nbsp;In the meantime, please enjoy Monotonic's Digital Archive Selection: " + json["now_playing"] + " " + "→".repeat(200);
