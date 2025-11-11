@@ -89,8 +89,10 @@ def get_current_video(need_bitrate=False):
             
             if not os.path.exists(mp3_path):
                 logger.warning(f"Current video {video_id} not downloaded yet")
+                download_from_bucket(video_id)
             if not os.path.exists(f'temp/{next_video}.mp3'):
-                logger.warning(f"Next video {next_video} not downloaded yet")
+                logger.warning(f"Next video {video_id} not downloaded yet")
+                download_from_bucket(next_video)
             
             if os.path.exists(f'temp/{prev_video}.mp3'):
                 try:
