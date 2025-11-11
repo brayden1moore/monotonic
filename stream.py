@@ -147,11 +147,9 @@ def get_mp3_bitrate(filepath):
     audio = mutagen.mp3.MP3(filepath)
     return audio.info.bitrate / 8
 
+import subprocess
+
 def generate_stream():
-    CHUNK_SIZE = 4096 
-    BUFFER_SIZE = 8192 
-    INITIAL_CHUNKS = 2
-    
     try:
         while True:
             current_video, id, mp3_path, video_elapsed = get_current_video()
@@ -160,30 +158,34 @@ def generate_stream():
                 logger.warning(f"File not found: {mp3_path}")
                 time.sleep(1)
                 continue
-                
-            bytes_per_second = get_mp3_bitrate(mp3_path)
-            start_byte = int(video_elapsed * bytes_per_second)
             
-            with open(mp3_path, 'rb') as f:
-                f.seek(start_byte)
-                chunk_count = 0
-                
+            cmd = [
+                'ffmpeg',
+                '-ss', str(video_elapsed),
+                '-i', mp3_path,
+                '-f', 'mp3',
+                '-c', 'copy', 
+                'pipe:1'
+            ]
+            
+            process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+            
+            try:
                 while True:
                     new_video, new_id, _, _ = get_current_video()
                     if new_id != id:
+                        process.kill()
                         break
-                        
-                    chunk = f.read(CHUNK_SIZE)
+                    
+                    chunk = process.stdout.read(8192)
                     if not chunk:
                         break
-                        
-                    yield chunk
-
-                    if chunk_count < INITIAL_CHUNKS:
-                        chunk_count += 1
-                    else:
-                        time.sleep(CHUNK_SIZE / bytes_per_second)
                     
+                    yield chunk
+                    
+            finally:
+                process.kill()
+                
     except Exception as e:
         logger.error(f"Streaming error: {e}")
 
