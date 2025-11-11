@@ -41,13 +41,13 @@
     </div>
 
 <div id="circle" >
-    <svg height="650" width="650">
+    <svg class="thumbnail" height="650" width="650">
         <defs>
             <clipPath id="circle-clip">
                 <path d="M50 325A275 275 0 1 1 600 325A275 275 0 1 1 50 325"/>
             </clipPath>
         </defs>
-        <image class="thumbnail" href="{{ thumbnail }}" x="50" y="50" width="550" height="550" clip-path="url(#circle-clip)" preserveAspectRatio="xMidYMid slice"/>
+        <image href="{{ thumbnail }}" x="50" y="50" width="550" height="550" clip-path="url(#circle-clip)" preserveAspectRatio="xMidYMid slice"/>
         <path id="blue-circle" style="fill: rgb(74, 128, 255); opacity: 0.8;" d="M50 325A275 275 0 1 1 600 325A275 275 0 1 1 50 325"></path>
     </svg>
     <div class="circle-txt"><svg height="650" width="650">
@@ -61,13 +61,13 @@
 </div>
 
 <div id="circle-mobile">
-    <svg height="325" width="325">
+    <svg class="thumbnail" height="325" width="325">
         <defs>
             <clipPath id="circle-clip-mobile">
                 <path d="M25 162.5A137.5 137.5 0 1 1 300 162.5A137.5 137.5 0 1 1 25 162.5"/>
             </clipPath>
         </defs>
-        <image class="thumbnail" href="{{ thumbnail }}" x="25" y="25" width="275" height="275" clip-path="url(#circle-clip-mobile)" preserveAspectRatio="xMidYMid slice"/>
+        <image  href="{{ thumbnail }}" x="25" y="25" width="275" height="275" clip-path="url(#circle-clip-mobile)" preserveAspectRatio="xMidYMid slice"/>
         <path id="blue-circle-mobile" style="fill: rgb(74, 128, 255); opacity: 0.8;" d="M25 162.5A137.5 137.5 0 1 1 300 162.5A137.5 137.5 0 1 1 25 162.5"></path>
     </svg>
     <div class="circle-txt">
@@ -156,7 +156,7 @@
 
 @keyframes spin-reverse {
     to {
-        transform:rotate(-1turn)
+        transform:rotate(-360deg)
     }
 }
 
