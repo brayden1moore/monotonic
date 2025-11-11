@@ -33,8 +33,7 @@ def clear_temp():
     for file in temp_dir:
         os.remove(f'temp/{file}')
 
-def get_current_video():
-    # get time since start and set iteration seed
+def get_shuffled_playlist():
     current_time = datetime.now()
     beginning_time = datetime(year=2025, month=7, day=11, hour=9)
     elapsed_seconds = (current_time - beginning_time).total_seconds()
@@ -48,6 +47,31 @@ def get_current_video():
         random.Random(iterations + attempt + 1).shuffle(shuffled_videos)
         attempt += 1
     
+    return shuffled_videos
+
+import subprocess
+import mutagen.mp3
+
+
+def get_mp3_bitrate(filepath):
+    cmd = [
+        'ffprobe', '-v', 'quiet', '-print_format', 'json',
+        '-show_streams', filepath
+    ]
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    data = json.loads(result.stdout)
+    bitrate = int(data['streams'][0]['bit_rate'])
+    return bitrate / 8
+
+
+def get_current_video(need_bitrate=False):
+    current_time = datetime.now()
+    beginning_time = datetime(year=2025, month=7, day=11, hour=9)
+    elapsed_seconds = (current_time - beginning_time).total_seconds()
+    iterations = int(elapsed_seconds // total_duration)
+    
+    shuffled_videos = get_shuffled_playlist()
+
     time_into_iteration = elapsed_seconds - (total_duration * iterations)
     time_sum = 0
     
@@ -72,15 +96,18 @@ def get_current_video():
                 except Exception as e:
                     logger.error(f"Failed to remove {prev_video}: {e}")
             
-            return v['title'], video_id, mp3_path, video_elapsed
+            if need_bitrate:
+                bitrate = get_mp3_bitrate(mp3_path)
+            else: 
+                bitrate = 0
+
+            return v['title'], video_id, mp3_path, video_elapsed, bitrate
         
         time_sum += v['duration']
     
-    logger.error("Failed to find current video in iteration")
     return "", "", "", 0
 
 
-from functools import lru_cache
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -109,39 +136,11 @@ def download_from_bucket(id, max_retries=3):
     
     return False
 
-def get_shuffled_playlist():
-    current_time = datetime.now()
-    beginning_time = datetime(year=2025, month=7, day=11, hour=9)
-    elapsed_seconds = (current_time - beginning_time).total_seconds()
-    iterations = int(elapsed_seconds // total_duration)
-    
-    shuffled_videos = videos.copy()
-    random.Random(iterations).shuffle(shuffled_videos)
-    
-    attempt = 0
-    while shuffled_videos[-1] == shuffled_videos[0] and attempt < 100:
-        random.Random(iterations + attempt + 1).shuffle(shuffled_videos)
-        attempt += 1
-    
-    return shuffled_videos
 
 def preload_files():
     while True:
         try:
-            _, current_id, _, _ = get_current_video()
-            shuffled_videos = get_shuffled_playlist()
-            
-            if not os.path.exists(f'temp/{current_id}.mp3'):
-                logger.info(f"URGENT: Downloading current video {current_id}")
-                download_from_bucket(current_id)
-            
-            current_index = shuffled_videos.index(current_id)
-            for i in range(1, 4):
-                next_id = shuffled_videos[(current_index + i) % len(shuffled_videos)]
-                if not os.path.exists(f'temp/{next_id}.mp3'):
-                    logger.info(f"Preloading: {next_id}")
-                    download_from_bucket(next_id)
-            
+            get_current_video()
             time.sleep(10)
             
         except Exception as e:
@@ -150,83 +149,41 @@ def preload_files():
 
 preloader = threading.Thread(target=preload_files, daemon=True)
 preloader.start()
-
-def get_monotonic_live_link():
-    url = 'https://monotonic.studio/live'
-    webpage = requests.get(url).text
-    soup = BeautifulSoup(webpage, 'html.parser')
-    iframes = soup.find_all('iframe')
-    for i in iframes:
-        if 'meshcast' in i['src']:
-            return i['src']
-        else:
-            return None
-        
-import mutagen.mp3
-
-def get_mp3_bitrate(filepath):
-    audio = mutagen.mp3.MP3(filepath)
-    return audio.info.bitrate / 8
-
-import subprocess
-
+    
 def generate_stream():
-    try:
-        while True:
-            current_video, id, mp3_path, video_elapsed = get_current_video()
-            
-            if not os.path.exists(mp3_path):
-                logger.warning(f"File not found: {mp3_path}")
-                time.sleep(1)
-                continue
-            
-            cmd = [
-                'ffmpeg',
-                '-ss', str(video_elapsed),
-                '-i', mp3_path,
-                '-f', 'mp3',
-                '-c', 'copy', 
-                'pipe:1'
-            ]
-            
-            process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
-            
-            try:
-                while True:
-                    new_video, new_id, _, _ = get_current_video()
-                    if new_id != id:
-                        process.kill()
-                        break
-                    
-                    chunk = process.stdout.read(8192)
-                    if not chunk:
-                        break
-                    
-                    yield chunk
-                    
-            finally:
-                process.kill()
-                
-    except Exception as e:
-        logger.error(f"Streaming error: {e}")
+    CHUNK_SIZE = 8192 
+    BUFFER_SIZE = 8192 
+    INITIAL_CHUNKS = 10
 
+    while True:
+        current_video, id, mp3_path, video_elapsed, bitrate = get_current_video(need_bitrate=True)
 
-from requests.adapters import HTTPAdapter
-from requests.packages.urllib3.util.retry import Retry
+        if not os.path.exists(mp3_path):
+            logger.warning(f"File not found: {mp3_path}")
+            time.sleep(1)
+            continue
 
-def create_session():
-    session = requests.Session()
-    retry = Retry(
-        total=3,
-        backoff_factor=0.3,
-        status_forcelist=[500, 502, 503, 504]
-    )
-    adapter = HTTPAdapter(max_retries=retry)
-    session.mount('http://', adapter)
-    session.mount('https://', adapter)
-    return session
+        start_byte = int(video_elapsed * bitrate)
 
-session = create_session()
+        with open(mp3_path, 'rb') as f:
+            f.seek(start_byte)
+            chunk_count = 0
+
+            while True:
+                new_video, new_id, _, _, _ = get_current_video(need_bitrate=False)
+                if new_id != id:
+                    break
+
+                chunk = f.read(CHUNK_SIZE)
+                if not chunk:
+                    break
+
+                yield chunk
+
+                if chunk_count < INITIAL_CHUNKS:
+                    chunk_count += 1
+                else:
+                    time.sleep(CHUNK_SIZE / bitrate)
 
 @app.route('/stream')
 def stream_mp3():
@@ -236,7 +193,8 @@ def stream_mp3():
         headers={
             'Cache-Control': 'no-cache, no-store, must-revalidate',
             'Accept-Ranges': 'none',   
-            'Content-Type': 'audio/mpeg'
+            'Content-Type': 'audio/mpeg',
+            'Transfer-Encoding': 'chunked'
         }
     )
 
@@ -247,15 +205,15 @@ def hello():
 
 @app.route('/info')
 def get_info():
-    current_video, id, mp3_path, video_elapsed = get_current_video()
+    current_video, id, mp3_path, video_elapsed, bitrate = get_current_video(need_bitrate=True)
     return {
         'now_playing': current_video,
         'video_description': video_dict[id]['description'],
         'duration': video_dict[id]['duration'],
-        'elapsed': video_elapsed
+        'elapsed': round(video_elapsed),
+        'bitrate': bitrate
     }
 
-clear_temp()
 get_current_video()
 
 if __name__ == '__main__':
