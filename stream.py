@@ -44,11 +44,10 @@ def get_current_video():
     # shuffle with seed
     shuffled_videos = videos.copy()
     random.Random(iterations).shuffle(shuffled_videos)
-    while shuffled_videos[-1] == videos[0]:
-        random.Random(iterations).shuffle(videos)
+    while shuffled_videos[-1] == shuffled_videos[0]:
+        random.Random(iterations).shuffle(shuffled_videos)
 
     # get video and time into video
-    video_list = list(video_dict.keys())
     time_into_iteration = elapsed_seconds - (total_duration * iterations)
     time_sum = 0
     video_elapsed = 0
@@ -56,22 +55,24 @@ def get_current_video():
     next_video = ''
     mp3_path = ''
 
-    for k, v in video_dict.items():
-
+    for i, video_id in enumerate(shuffled_videos):
+        v = video_dict[video_id]
+        
         if time_sum + v['duration'] > time_into_iteration:
             video_elapsed = time_into_iteration - time_sum
-            video = k
-            title = v['title']
-            mp3_path = f'temp/{k}.mp3'
+            mp3_path = f'temp/{video_id}.mp3'
             
-            video_index = video_list.index(k)
-            if video_index < len(video_list) - 1:
-                next_video = video_list[video_index + 1]
-            else:
-                next_video = video_list[0]
+            next_video = shuffled_videos[(i + 1) % len(shuffled_videos)]
+            prev_video = shuffled_videos[i - 1]
             
-            prev_video = video_list[video_index - 1]
-            break
+            if not os.path.exists(f'temp/{video_id}.mp3'):
+                download_from_bucket(video_id)
+            if not os.path.exists(f'temp/{next_video}.mp3'):
+                download_from_bucket(next_video)
+            if os.path.exists(f'temp/{prev_video}.mp3'):
+                os.remove(f'temp/{prev_video}.mp3')
+            
+            return v['title'], video_id, mp3_path, video_elapsed
         
         time_sum += v['duration']
 
@@ -82,7 +83,7 @@ def get_current_video():
     if os.path.exists(f'temp/{prev_video}.mp3'):
         os.remove(f'temp/{prev_video}.mp3')
 
-    return title, video, mp3_path, video_elapsed
+    return v['title'], video, mp3_path, video_elapsed
 
 
 from functools import lru_cache
@@ -139,9 +140,15 @@ def get_monotonic_live_link():
             return i['src']
         else:
             return None
+        
+import mutagen.mp3
+
+def get_mp3_bitrate(filepath):
+    audio = mutagen.mp3.MP3(filepath)
+    return audio.info.bitrate / 8
 
 def generate_stream():
-    CHUNK_SIZE = 4096 
+    CHUNK_SIZE = 8192 
     BUFFER_SIZE = 16384 
     INITIAL_CHUNKS = 3
     
@@ -154,7 +161,7 @@ def generate_stream():
                 time.sleep(1)
                 continue
                 
-            bytes_per_second = 16000
+            bytes_per_second = get_mp3_bitrate(mp3_path)
             start_byte = int(video_elapsed * bytes_per_second)
             
             with open(mp3_path, 'rb') as f:
