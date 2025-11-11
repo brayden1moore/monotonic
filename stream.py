@@ -209,7 +209,8 @@ def get_info():
         'video_description': video_dict[id]['description'],
         'duration': video_dict[id]['duration'],
         'elapsed': round(video_elapsed),
-        'bitrate': bitrate
+        'bitrate': bitrate,
+        'link': f'https://www.youtube.com/watch?v={id}'
     }
 
 get_current_video()
