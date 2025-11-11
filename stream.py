@@ -140,7 +140,6 @@ def download_from_bucket(id, max_retries=3):
             logger.error(f"Attempt {attempt+1} failed to download {id}: {e}")
             if attempt < max_retries - 1:
                 time.sleep(2 ** attempt) 
-    
     return False
 
 def preload_files():
