@@ -161,32 +161,41 @@ def generate_stream():
     CHUNK_SIZE = 8192 
     BUFFER_SIZE = 16384 
     INITIAL_CHUNKS = 10
-
+    
+    last_completed_id = None  # Track which video just ended
+    
     while True:
         current_video, id, mp3_path, video_elapsed, bitrate = get_current_video(need_bitrate=True)
-
+        
+        if id == last_completed_id:
+            time.sleep(0.5)  
+            continue
+        
         if not os.path.exists(mp3_path):
             logger.warning(f"File not found: {mp3_path}")
             time.sleep(1)
             continue
-
+        
         start_byte = int(video_elapsed * bitrate)
-
+        
         with open(mp3_path, 'rb') as f:
             f.seek(start_byte)
             chunk_count = 0
-
+            file_ended_naturally = False 
+            
             while True:
                 new_video, new_id, _, _, _ = get_current_video(need_bitrate=False)
                 if new_id != id:
                     break
-
+                
                 chunk = f.read(CHUNK_SIZE)
                 if not chunk:
+                    file_ended_naturally = True
+                    last_completed_id = id  
                     break
-
+                
                 yield chunk
-
+                
                 if chunk_count < INITIAL_CHUNKS:
                     chunk_count += 1
                 else:
