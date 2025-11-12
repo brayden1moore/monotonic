@@ -461,7 +461,7 @@ function getUpdatedInfo() {
       })
       .then(function(response) { return response.json(); })
       .then(function(json) {
-          if (json['thumbnail'] != thumbnail.src) {
+          if (json['thumbnail'] != thumbnail.href) {
               thumbnail.href = json['thumbnail'];
               thumbnailMobile.href = json['thumbnail'];
           }
