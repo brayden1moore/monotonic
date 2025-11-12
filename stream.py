@@ -159,10 +159,10 @@ preloader.start()
     
 def generate_stream():
     CHUNK_SIZE = 8192 
-    BUFFER_SIZE = 16384 * 16
+    BUFFER_SIZE = 16384 * 32
     INITIAL_CHUNKS = 16
     
-    last_completed_id = None  # Track which video just ended
+    last_completed_id = None  
     
     while True:
         current_video, id, mp3_path, video_elapsed, bitrate = get_current_video(need_bitrate=True)
