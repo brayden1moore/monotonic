@@ -461,8 +461,8 @@ function getUpdatedInfo() {
           const remainingTime = Number(json['duration']) - Number(json['elapsed']);
           const endTime = new Date();
           endTime.setSeconds(endTime.getSeconds() + remainingTime);
-          nowPlaying.innerHTML = json['now_playing'] + ' (Re-Run) | Until ' +  endTime.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
-          const archiveText = "&nbsp;&nbsp;In the meantime, please enjoy Monotonic's Digital Archive Selection: " + json["now_playing"] + " " + "→".repeat(200);
+          nowPlaying.innerHTML = json['now_playing'] + ' (Re-Run) - Until ' +  endTime.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
+          const archiveText = "&nbsp;&nbsp;In the meantime, please enjoy Monotonic's digital archive selection: " + json["now_playing"] + " " + "→".repeat(200);
           if (showText) showText.innerHTML = archiveText;
           if (showTextMobile) showTextMobile.innerHTML = archiveText;
       });
