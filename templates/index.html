@@ -500,6 +500,30 @@ if (streamLink && streamLink.trim() !== '') {
     play.style.display = 'flex';
 }
 
+function updateMediaSession(title, artist, artwork) {
+  if ('mediaSession' in navigator) {
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: title,
+      artist: artist,
+      album: 'Monotonic Radio',
+      artwork: [
+        { src: artwork, sizes: '96x96',   type: 'image/png' },
+        { src: artwork, sizes: '128x128', type: 'image/png' },
+        { src: artwork, sizes: '256x256', type: 'image/png' },
+        { src: artwork, sizes: '512x512', type: 'image/png' }
+      ]
+    });
+
+    navigator.mediaSession.setActionHandler('play', () => {
+      audio.play();
+    });
+    
+    navigator.mediaSession.setActionHandler('pause', () => {
+      audio.pause();
+    });
+  }
+}
+
 const nowPlaying = document.getElementById('now-playing');
 const showText = document.getElementById('show-text');
 const showTextMobile = document.getElementById('show-text-mobile');
@@ -528,6 +552,8 @@ function getUpdatedInfo() {
         const archiveText = "&nbsp;&nbsp;In the meantime, please enjoy Monotonic's digital archive selection → " + json["now_playing"] + " " + "-".repeat(200);
         if (showText) showText.innerHTML = archiveText;
         if (showTextMobile) showTextMobile.innerHTML = archiveText;
+
+        updateMediaSession(json['now_playing'], 'Monotonic Radio', json['thumbnail']);
     });
 }
 
