@@ -204,9 +204,7 @@ def stream_mp3():
         }
     )
 
-@app.route('/')
-def hello():
-    current_video, id, mp3_path, video_elapsed, bitrate = get_current_video()
+def get_thumbnail():
     thumbnail = video_dict[id]['thumbnail']
     try:
         response = requests.head(thumbnail, timeout=0.5)
@@ -214,20 +212,26 @@ def hello():
             thumbnail = 'assets/mtr.jpg'
     except (requests.RequestException, requests.Timeout):
         thumbnail = 'assets/mtr.jpg'
-    
-    return render_template('index.html', now_playing=current_video, thumbnail=thumbnail)
+    return thumbnail
+
+@app.route('/')
+def hello():
+    current_video, id, mp3_path, video_elapsed, bitrate = get_current_video()
+    return render_template('index.html', now_playing=current_video, thumbnail=get_thumbnail())
     #return redirect("http://www.monotonic.studio/live", code=302)
 
 @app.route('/info')
 def get_info():
     current_video, id, mp3_path, video_elapsed, bitrate = get_current_video(need_bitrate=True)
+
     return {
         'now_playing': current_video,
         'video_description': video_dict[id]['description'],
         'duration': video_dict[id]['duration'],
         'elapsed': round(video_elapsed),
         'bitrate': bitrate,
-        'link': f'https://www.youtube.com/watch?v={id}'
+        'link': f'https://www.youtube.com/watch?v={id}',
+        'thumbnail':get_thumbnail()
     }
 
 get_current_video()
