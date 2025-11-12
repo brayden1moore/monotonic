@@ -159,7 +159,7 @@ preloader.start()
     
 def generate_stream():
     CHUNK_SIZE = 8192 
-    BUFFER_SIZE = 16384 
+    BUFFER_SIZE = 16384 * 2
     INITIAL_CHUNKS = 10
     
     last_completed_id = None  # Track which video just ended
