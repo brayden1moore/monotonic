@@ -204,7 +204,7 @@ def stream_mp3():
         }
     )
 
-def get_thumbnail():
+def get_thumbnail(id):
     thumbnail = video_dict[id]['thumbnail']
     try:
         response = requests.head(thumbnail, timeout=0.5)
@@ -217,7 +217,7 @@ def get_thumbnail():
 @app.route('/')
 def hello():
     current_video, id, mp3_path, video_elapsed, bitrate = get_current_video()
-    return render_template('index.html', now_playing=current_video, thumbnail=get_thumbnail())
+    return render_template('index.html', now_playing=current_video, thumbnail=get_thumbnail(id))
     #return redirect("http://www.monotonic.studio/live", code=302)
 
 @app.route('/info')
@@ -231,7 +231,7 @@ def get_info():
         'elapsed': round(video_elapsed),
         'bitrate': bitrate,
         'link': f'https://www.youtube.com/watch?v={id}',
-        'thumbnail':get_thumbnail()
+        'thumbnail':get_thumbnail(id)
     }
 
 get_current_video()
