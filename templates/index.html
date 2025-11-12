@@ -461,7 +461,7 @@ function getUpdatedInfo() {
           const remainingTime = Number(json['duration']) - Number(json['elapsed']);
           const endTime = new Date();
           endTime.setSeconds(endTime.getSeconds() + remainingTime);
-          nowPlaying.innerHTML = json['now_playing'] + '<span style="font-family:Archivo Regular;"> (Re-Run) - Until ' +  endTime.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true }) + '</span>';
+          nowPlaying.innerHTML = json['now_playing'] + '<span style="font-family:Archivo Regular;"> - (Re-Run) - Until ' +  endTime.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true }) + '</span>';
           const archiveText = "&nbsp;&nbsp;In the meantime, please enjoy Monotonic's digital archive selection: " + json["now_playing"] + " " + "→".repeat(200);
           if (showText) showText.innerHTML = archiveText;
           if (showTextMobile) showTextMobile.innerHTML = archiveText;
