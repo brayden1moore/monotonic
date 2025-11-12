@@ -52,7 +52,7 @@
           </pattern>
         </defs>
 
-        <image id="thumbnail" src="{{ thumbnail }}" x="50" y="50" width="550" height="550" clip-path="url(#circle-clip)" preserveAspectRatio="xMidYMid slice"/>
+        <image id="thumbnail" href="{{ thumbnail }}" x="50" y="50" width="550" height="550" clip-path="url(#circle-clip)" preserveAspectRatio="xMidYMid slice"/>
         <rect x="50" y="50" width="550" height="550" fill="url(#noise-pattern)" clip-path="url(#circle-clip)" style="pointer-events: none; opacity: .25;"/>
     </svg>
     <div class="circle-txt"><svg height="650" width="650">
@@ -75,7 +75,7 @@
               <image href="assets/noise.gif" x="0" y="0" width="100" height="100"/>
           </pattern>
         </defs>
-        <image id="thumbnail-mobile" src="{{ thumbnail }}" x="25" y="25" width="275" height="275" clip-path="url(#circle-clip-mobile)" preserveAspectRatio="xMidYMid slice"/>
+        <image id="thumbnail-mobile" href="{{ thumbnail }}" x="25" y="25" width="275" height="275" clip-path="url(#circle-clip-mobile)" preserveAspectRatio="xMidYMid slice"/>
         <rect x="25" y="25" width="275" height="275" fill="url(#noise-pattern-mobile)" clip-path="url(#circle-clip-mobile)" style="pointer-events: none; opacity: .25;"/>
         <path id="blue-circle-mobile" style="fill: rgb(74, 128, 255); opacity: 0;" d="M25 162.5A137.5 137.5 0 1 1 300 162.5A137.5 137.5 0 1 1 25 162.5"></path>
     </svg>
@@ -462,8 +462,8 @@ function getUpdatedInfo() {
       .then(function(response) { return response.json(); })
       .then(function(json) {
           if (json['thumbnail'] != thumbnail.src) {
-              thumbnail.src = json['thumbnail'];
-              thumbnailMobile.src = json['thumbnail'];
+              thumbnail.href = json['thumbnail'];
+              thumbnailMobile.href = json['thumbnail'];
           }
           const remainingTime = Number(json['duration']) - Number(json['elapsed']);
           const endTime = new Date();
