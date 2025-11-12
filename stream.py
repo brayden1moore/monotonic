@@ -207,7 +207,15 @@ def stream_mp3():
 @app.route('/')
 def hello():
     current_video, id, mp3_path, video_elapsed, bitrate = get_current_video()
-    return render_template('index.html', now_playing=current_video, thumbnail=video_dict[id]['thumbnail'])
+    thumbnail = video_dict[id]['thumbnail']
+    try:
+        response = requests.head(thumbnail, timeout=0.5)
+        if response.status_code == 404:
+            thumbnail = 'assets/mtr.jpg'
+    except (requests.RequestException, requests.Timeout):
+        thumbnail = 'assets/mtr.jpg'
+    
+    return render_template('index.html', now_playing=current_video, thumbnail=thumbnail)
     #return redirect("http://www.monotonic.studio/live", code=302)
 
 @app.route('/info')
