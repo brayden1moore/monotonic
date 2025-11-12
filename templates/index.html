@@ -456,24 +456,26 @@ const thumbnail = document.getElementById('thumbnail');
 const thumbnailMobile = document.getElementById('thumbnail-mobile');
 
 function getUpdatedInfo() {
-      fetch('https://monotonicradio.com/info', {
-          method: 'GET'
-      })
-      .then(function(response) { return response.json(); })
-      .then(function(json) {
-          if (json['thumbnail'] != thumbnail.href) {
-              console.log(thumbnail.href);
-              thumbnail.href = json['thumbnail'];
-              thumbnailMobile.href = json['thumbnail'];
-          }
-          const remainingTime = Number(json['duration']) - Number(json['elapsed']);
-          const endTime = new Date();
-          endTime.setSeconds(endTime.getSeconds() + remainingTime);
-          nowPlaying.innerHTML = json['now_playing'] + '<span style="font-family:Archivo Regular;"> - (Re-Run) - Until ' +  endTime.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true }) + '</span>';
-          const archiveText = "&nbsp;&nbsp;In the meantime, please enjoy Monotonic's digital archive selection → " + json["now_playing"] + " " + "→".repeat(200);
-          if (showText) showText.innerHTML = archiveText;
-          if (showTextMobile) showTextMobile.innerHTML = archiveText;
-      });
+    fetch('https://monotonicradio.com/info', {
+        method: 'GET'
+    })
+    .then(function(response) { return response.json(); })
+    .then(function(json) {
+        if (json['thumbnail'] != thumbnail.getAttribute('href')) {
+            console.log(thumbnail.getAttribute('href'));
+            thumbnail.setAttribute('href', json['thumbnail']);
+            thumbnailMobile.setAttribute('href', json['thumbnail']);
+        }
+        
+        const remainingTime = Number(json['duration']) - Number(json['elapsed']);
+        const endTime = new Date();
+        endTime.setSeconds(endTime.getSeconds() + remainingTime);
+        nowPlaying.innerHTML = json['now_playing'] + '<span style="font-family:Archivo Regular;"> - (Re-Run) - Until ' +  endTime.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true }) + '</span>';
+        
+        const archiveText = "&nbsp;&nbsp;In the meantime, please enjoy Monotonic's digital archive selection → " + json["now_playing"] + " " + "→".repeat(200);
+        if (showText) showText.innerHTML = archiveText;
+        if (showTextMobile) showTextMobile.innerHTML = archiveText;
+    });
 }
 
 getUpdatedInfo();
