@@ -226,8 +226,8 @@ def get_thumbnail(id):
 @app.route('/')
 def hello():
     current_video, id, mp3_path, video_elapsed, bitrate = get_current_video()
-    #return render_template('index.html', now_playing=current_video, thumbnail=get_thumbnail(id))
-    return redirect("http://www.monotonic.studio/live", code=302)
+    return render_template('index.html', now_playing=current_video, thumbnail=get_thumbnail(id))
+    #return redirect("http://www.monotonic.studio/live", code=302)
 
 @app.route('/info')
 def get_info():
