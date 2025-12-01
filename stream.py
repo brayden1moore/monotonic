@@ -159,18 +159,17 @@ preloader.start()
     
 def generate_stream():
     CHUNK_SIZE = 8192 
-    BUFFER_SIZE = 16384 * 32
+    BUFFER_SIZE = 16384 * 16
     INITIAL_CHUNKS = 16
-    
-    last_completed_id = None  
+    last_completed_id = None
     
     while True:
         current_video, id, mp3_path, video_elapsed, bitrate = get_current_video(need_bitrate=True)
         
         if id == last_completed_id:
-            time.sleep(0.5)  
+            time.sleep(0.5)
             continue
-        
+            
         if not os.path.exists(mp3_path):
             logger.warning(f"File not found: {mp3_path}")
             time.sleep(1)
@@ -180,19 +179,35 @@ def generate_stream():
         
         with open(mp3_path, 'rb') as f:
             f.seek(start_byte)
+            
+            buffer = []
+            bytes_buffered = 0
+            
+            while bytes_buffered < BUFFER_SIZE:
+                chunk = f.read(CHUNK_SIZE)
+                if not chunk:
+                    break
+                buffer.append(chunk)
+                bytes_buffered += len(chunk)
+            
             chunk_count = 0
-            file_ended_naturally = False 
+            buffer_index = 0
+            file_ended = False
             
             while True:
                 new_video, new_id, _, _, _ = get_current_video(need_bitrate=False)
                 if new_id != id:
                     break
                 
-                chunk = f.read(CHUNK_SIZE)
-                if not chunk:
-                    file_ended_naturally = True
-                    last_completed_id = id  
-                    break
+                if buffer_index < len(buffer):
+                    chunk = buffer[buffer_index]
+                    buffer_index += 1
+                else:
+                    chunk = f.read(CHUNK_SIZE)
+                    if not chunk:
+                        file_ended = True
+                        last_completed_id = id
+                        break
                 
                 yield chunk
                 
