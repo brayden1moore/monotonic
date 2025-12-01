@@ -160,7 +160,7 @@ preloader.start()
 def generate_stream():
     CHUNK_SIZE = 8192 
     BUFFER_SIZE = 16384 * 16
-    INITIAL_CHUNKS = 16
+    INITIAL_CHUNKS = 32
     last_completed_id = None
     
     while True:
@@ -180,9 +180,9 @@ def generate_stream():
         with open(mp3_path, 'rb') as f:
             f.seek(start_byte)
             
+            # Pre-buffer
             buffer = []
             bytes_buffered = 0
-            
             while bytes_buffered < BUFFER_SIZE:
                 chunk = f.read(CHUNK_SIZE)
                 if not chunk:
@@ -192,12 +192,13 @@ def generate_stream():
             
             chunk_count = 0
             buffer_index = 0
-            file_ended = False
             
             while True:
                 new_video, new_id, _, _, _ = get_current_video(need_bitrate=False)
                 if new_id != id:
                     break
+                
+                chunk_start = time.time()
                 
                 if buffer_index < len(buffer):
                     chunk = buffer[buffer_index]
@@ -205,7 +206,6 @@ def generate_stream():
                 else:
                     chunk = f.read(CHUNK_SIZE)
                     if not chunk:
-                        file_ended = True
                         last_completed_id = id
                         break
                 
@@ -214,7 +214,11 @@ def generate_stream():
                 if chunk_count < INITIAL_CHUNKS:
                     chunk_count += 1
                 else:
-                    time.sleep(CHUNK_SIZE / bitrate)
+                    chunk_duration = CHUNK_SIZE / bitrate
+                    elapsed = time.time() - chunk_start
+                    sleep_time = chunk_duration - elapsed
+                    if sleep_time > 0:
+                        time.sleep(sleep_time)
 
 @app.route('/stream')
 def stream_mp3():
