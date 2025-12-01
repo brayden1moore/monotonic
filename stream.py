@@ -159,9 +159,9 @@ preloader.start()
     
 def generate_stream():
     CHUNK_SIZE = 8192 
-    BUFFER_SIZE = 16384 * 32
+    BUFFER_SIZE = 16384 * 16
     INITIAL_CHUNKS = 16
-    MIN_BUFFER_CHUNKS = 16  # Refill when buffer gets low
+    MIN_BUFFER_CHUNKS = 8
     last_completed_id = None
     
     while True:
@@ -194,6 +194,10 @@ def generate_stream():
             chunk_count = 0
             file_ended = len(buffer[-1]) < CHUNK_SIZE if buffer else True
             
+            # Track total bytes sent for accurate timing
+            stream_start_time = time.time()
+            total_bytes_sent = 0
+            
             while True:
                 new_video, new_id, _, _, _ = get_current_video(need_bitrate=False)
                 if new_id != id:
@@ -204,11 +208,10 @@ def generate_stream():
                         last_completed_id = id
                     break
                 
-                chunk_start = time.time()
-                
-                # Get chunk from buffer
                 chunk = buffer.pop(0)
                 yield chunk
+                
+                total_bytes_sent += len(chunk)
                 
                 # Refill buffer proactively
                 if len(buffer) < MIN_BUFFER_CHUNKS and not file_ended:
@@ -223,9 +226,11 @@ def generate_stream():
                 if chunk_count < INITIAL_CHUNKS:
                     chunk_count += 1
                 else:
-                    chunk_duration = CHUNK_SIZE / bitrate
-                    elapsed = time.time() - chunk_start
-                    sleep_time = chunk_duration - elapsed
+                    # Calculate where we SHOULD be in time based on bytes sent
+                    expected_time = total_bytes_sent / bitrate
+                    actual_time = time.time() - stream_start_time
+                    sleep_time = expected_time - actual_time
+                    
                     if sleep_time > 0:
                         time.sleep(sleep_time)
 
