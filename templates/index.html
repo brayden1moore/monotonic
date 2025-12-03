@@ -24,22 +24,16 @@
       <div class="colors">
           <div class="a-color blue"></div>
           <div class="a-color red"></div>
-          <div class="a-color black"></div>
           <div class="a-color blue"></div>
           <div class="a-color red"></div>
-          <div class="a-color black"></div>
           <div class="a-color blue"></div>
           <div class="a-color red"></div>
-          <div class="a-color black"></div>
           <div class="a-color blue"></div>
           <div class="a-color red"></div>
-          <div class="a-color black"></div>
           <div class="a-color blue"></div>
           <div class="a-color red"></div>
-          <div class="a-color black"></div>   
           <div class="a-color blue"></div>
           <div class="a-color red"></div>
-          <div class="a-color black"></div>                                                
       </div>
 
       <svg id="play-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M24 22h-24l12-20z"/></svg>
@@ -103,7 +97,7 @@
     <div class="circle-txt">
         <svg height="325" width="325">
             <path id="ellipse-id-mobile" style="fill: none;" d="M12.5 162.5A150 150 0 1 1 312.5 162.5A150 150 0 1 1 12.5 162.5"></path>
-            <text><textPath xlink:href="#ellipse-id-mobile"><tspan id="show-text-mobile">&nbsp;&nbsp;In the meantime, please enjoy Monotonic's digital archive selection → {{ now_playing }} →→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→</tspan></textPath></text>
+            <text><textPath xlink:href="#ellipse-id-mobile"><tspan id="show-text-mobile">&nbsp;&nbsp;In the meantime, please enjoy Monotonic's digital archive selection → {{ now_playing }}</tspan></textPath></text>
         </svg>
     </div>
     <div id="tune-in">
@@ -557,7 +551,7 @@ function getUpdatedInfo() {
         endTime.setSeconds(endTime.getSeconds() + remainingTime);
         nowPlaying.innerHTML = json['now_playing'] + '<span style="font-family:Archivo Regular;"> - (Re-Run) - Until ' +  endTime.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true }) + '</span>';
         
-        const archiveText = "&nbsp;&nbsp;In the meantime, please enjoy Monotonic's digital archive selection → " + json["now_playing"] + " " + "-".repeat(200);
+        const archiveText = "&nbsp;&nbsp;In the meantime, please enjoy Monotonic's digital archive selection → " + json["now_playing"];
         if (showText) showText.innerHTML = archiveText;
         if (showTextMobile) showTextMobile.innerHTML = archiveText;
 
