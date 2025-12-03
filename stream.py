@@ -225,6 +225,7 @@ def get_info():
         'now_playing': current,
         'video_description': archive_dict[id]['description'],
         'duration': archive_dict[id]['duration'],
+        'genres': archive_dict[id]['genres'],
         'elapsed': round(video_elapsed),
         'byterate': byterate,
         'thumbnail': get_thumbnail(id)
