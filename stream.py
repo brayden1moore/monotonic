@@ -214,7 +214,8 @@ def get_thumbnail(id):
 @app.route('/')
 def hello():
     current, id, mp3_path, video_elapsed, byterate = get_current()
-    return render_template('index.html', now_playing=current, thumbnail=get_thumbnail(id))
+    genres = ', '.join(archive_dict[id]['genres'])
+    return render_template('index.html', now_playing=current, genres=genres, description=archive_dict[id]['description'], thumbnail=get_thumbnail(id))
     #return redirect("http://www.monotonic.studio/live", code=302)
 
 @app.route('/info')
@@ -230,6 +231,9 @@ def get_info():
         'byterate': byterate,
         'thumbnail': get_thumbnail(id)
     }
+
+for id, _ in archive_dict.items():
+    download_from_bucket(id)
 
 get_current()
 
