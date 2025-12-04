@@ -178,9 +178,9 @@ def generate_stream():
                     actual_time = time.time() - stream_start_time
                     sleep_time = expected_time - actual_time
                     
-                    if sleep_time > 0:
-                        logging.info(f"sleeping for {sleep_time}")
-                        time.sleep(sleep_time)
+                    #if sleep_time > 0:
+                    #    logging.info(f"sleeping for {sleep_time}")
+                    #    time.sleep(sleep_time)
 
 @app.route('/stream')
 def stream_mp3():
