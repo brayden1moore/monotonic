@@ -113,22 +113,33 @@ preloader = threading.Thread(target=preload_files, daemon=True)
 preloader.start()
     
 def generate_stream():
-    logging.info('generating stream?')
+    logging.info('generating stream started')
     CHUNK_SIZE = 8192 
     BUFFER_SIZE = 16384 * 16
     INITIAL_CHUNKS = 16
     MIN_BUFFER_CHUNKS = 8
-    last_completed_id = None
+    
+    # Track actual stream time separately from system time
+    stream_absolute_start = time.time()
+    total_stream_bytes = 0
     
     while True:
         current_video, id, mp3_path, video_elapsed, bitrate = get_current()
         
+        if not os.path.exists(mp3_path):
+            logger.warning(f"File not found: {mp3_path}")
+            time.sleep(0.5)
+            continue
+        
+        # Calculate where we should be based on our stream time, not system time
+        stream_elapsed = time.time() - stream_absolute_start
+        
         start_byte = int(video_elapsed * bitrate)
+        logger.info(f"Video {id}: seeking to byte {start_byte} ({video_elapsed:.1f}s)")
         
         with open(mp3_path, 'rb') as f:
             f.seek(start_byte)
             
-            # Pre-buffer
             buffer = []
             bytes_buffered = 0
             while bytes_buffered < BUFFER_SIZE:
@@ -140,47 +151,41 @@ def generate_stream():
             
             chunk_count = 0
             file_ended = len(buffer[-1]) < CHUNK_SIZE if buffer else True
-            
-            # Track total bytes sent for accurate timing
-            stream_start_time = time.time()
-            total_bytes_sent = 0
+            video_start_time = time.time()
+            video_bytes_sent = 0
             
             while True:
                 new_video, new_id, _, _, _ = get_current()
                 if new_id != id:
+                    logger.info(f"Switch: {id} -> {new_id}")
                     break
                 
                 if not buffer:
-                    if file_ended:
-                        last_completed_id = id
                     break
                 
                 chunk = buffer.pop(0)
                 yield chunk
                 
-                total_bytes_sent += len(chunk)
+                video_bytes_sent += len(chunk)
+                total_stream_bytes += len(chunk)
                 
-                # Refill buffer proactively
                 if len(buffer) < MIN_BUFFER_CHUNKS and not file_ended:
                     new_chunk = f.read(CHUNK_SIZE)
                     if new_chunk:
                         buffer.append(new_chunk)
-                        if len(new_chunk) < CHUNK_SIZE:
-                            file_ended = True
+                        file_ended = len(new_chunk) < CHUNK_SIZE
                     else:
                         file_ended = True
                 
-                if chunk_count < INITIAL_CHUNKS:
-                    chunk_count += 1
-                else:
-                    # Calculate where we SHOULD be in time based on bytes sent
-                    expected_time = total_bytes_sent / bitrate
-                    actual_time = time.time() - stream_start_time
+                if chunk_count >= INITIAL_CHUNKS:
+                    expected_time = video_bytes_sent / bitrate
+                    actual_time = time.time() - video_start_time
                     sleep_time = expected_time - actual_time
                     
-                    #if sleep_time > 0:
-                    #    logging.info(f"sleeping for {sleep_time}")
-                    #    time.sleep(sleep_time)
+                    if sleep_time > 0:
+                        time.sleep(sleep_time)
+                else:
+                    chunk_count += 1
 
 @app.route('/stream')
 def stream_mp3():
