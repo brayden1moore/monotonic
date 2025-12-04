@@ -121,7 +121,6 @@ def generate_stream():
     last_completed_id = None
     
     while True:
-        logging.info('in loop')
         current_video, id, mp3_path, video_elapsed, bitrate = get_current()
         
         start_byte = int(video_elapsed * bitrate)
@@ -179,8 +178,9 @@ def generate_stream():
                     actual_time = time.time() - stream_start_time
                     sleep_time = expected_time - actual_time
                     
-                    #if sleep_time > 0:
-                    #    time.sleep(sleep_time)
+                    if sleep_time > 0:
+                        logging.info(f"sleeping for {sleep_time}")
+                        time.sleep(sleep_time)
 
 @app.route('/stream')
 def stream_mp3():
