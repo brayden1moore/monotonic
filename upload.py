@@ -78,6 +78,7 @@ def get_mp3_bitrate_and_duration(filepath):
 
 total_duration = 0
 for key, val in archive_dict.items():
+    print(key)
     bitrate, duration = get_mp3_bitrate_and_duration(f'archives/{key}.mp3')
     archive_dict[key]['bitrate'] = bitrate
     archive_dict[key]['duration'] = duration
