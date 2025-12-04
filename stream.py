@@ -215,7 +215,7 @@ def get_thumbnail(id):
 def hello():
     current, id, mp3_path, video_elapsed, byterate = get_current()
     genres = ', '.join(archive_dict[id]['genres'])
-    return render_template('index.html', now_playing=current, genres=genres, description=archive_dict[id]['description'], thumbnail=get_thumbnail(id))
+    return render_template('index.html', now_playing=current, genres=genres, description=archive_dict[id]['description'].replace('\n','<br>'), thumbnail=get_thumbnail(id))
     #return redirect("http://www.monotonic.studio/live", code=302)
 
 @app.route('/info')
