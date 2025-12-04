@@ -113,6 +113,7 @@ preloader = threading.Thread(target=preload_files, daemon=True)
 preloader.start()
     
 def generate_stream():
+    logging.info('generating stream?')
     CHUNK_SIZE = 8192 
     BUFFER_SIZE = 16384 * 16
     INITIAL_CHUNKS = 16
@@ -120,6 +121,7 @@ def generate_stream():
     last_completed_id = None
     
     while True:
+        logging.info('in loop')
         current_video, id, mp3_path, video_elapsed, bitrate = get_current()
         
         start_byte = int(video_elapsed * bitrate)
