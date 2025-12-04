@@ -618,7 +618,7 @@ function getUpdatedInfo() {
         if (showTextMobile) showTextMobile.innerHTML = archiveText;
 
         titleInfo.innerHTML = json['now_playing'];
-        descriptionInfo.innerHTML = json['video_description'];
+        descriptionInfo.innerHTML = json['video_description'].replace('\n','<br>');
 
         updateMediaSession(json['now_playing'], 'Monotonic Radio', 'assets/mtr.jpg');
     });
