@@ -121,10 +121,6 @@ def generate_stream():
     
     while True:
         current_video, id, mp3_path, video_elapsed, bitrate = get_current()
-        
-        if id == last_completed_id:
-            time.sleep(0.5)
-            continue
             
         if not os.path.exists(mp3_path):
             logger.warning(f"File not found: {mp3_path}")
