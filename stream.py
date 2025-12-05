@@ -187,6 +187,62 @@ def generate_stream():
                 else:
                     chunk_count += 1
 
+import subprocess
+def generate_live_stream():
+    youtube_url = "https://www.youtube.com/watch?v=mKCieTImjvU"
+    
+    mpv_command = [
+        "mpv",
+        "--no-video",
+        "--no-terminal",
+        "--o=-",               
+        "--of=mp3",             
+        "--oac=libmp3lame",    
+        "--oacopts=b=128k",    
+        youtube_url
+    ]
+    
+    print("Starting MPV direct stream...")
+    
+    try:
+        process = subprocess.Popen(
+            mpv_command,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            bufsize=10**8
+        )
+        
+        while True:
+            chunk = process.stdout.read(8192)
+            
+            if not chunk:
+                if process.poll() is not None:
+                    stderr = process.stderr.read().decode('utf-8', errors='ignore')
+                    print(f"MPV ended. Last stderr: {stderr[-500:]}")
+                break
+            
+            yield chunk
+                
+    except Exception as e:
+        print(f"Streaming error: {e}")
+    finally:
+        if 'process' in locals():
+            process.kill()
+
+@app.route('/test')
+def stream_live_mp3():
+    return Response(
+        generate_live_stream(),
+        mimetype='audio/mpeg',
+        headers={
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0',
+            'Content-Type': 'audio/mpeg',
+            'X-Content-Type-Options': 'nosniff'
+        }
+    )
+
 @app.route('/stream')
 def stream_mp3():
     return Response(
