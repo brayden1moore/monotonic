@@ -47,11 +47,8 @@
     <i></i>
 
     <div id="stream-and-chat">
-
-      <div id="video"><iframe id="stream"  class="stream"></iframe></div>
-      
+      <div id="video"><iframe width="560" height="315" src="" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>
       <iframe id="chat" src="https://monotonicradio1.chatango.com/" class="scroll-transition-fade"></iframe>
-      <p class="message"> if it gets buggy, refresh </p>
     </div>
 
     <div id="circle" >
@@ -545,22 +542,10 @@ if (circleMobile) circleMobile.addEventListener('click', toggle);
 
 const online = document.getElementById('live-status-online');
 const offline = document.getElementById('live-status-offline');
-const streamLink = document.getElementById('stream').src;
+const stream = document.getElementById('stream');
 console.log('Stream');
 console.log(streamLink);
 const video = document.getElementById('stream-and-chat');
-
-if (streamLink && streamLink.trim() !== '') {
-    online.style.display = 'contents';
-    offline.style.display = 'none';
-    video.style.display = 'block';
-    play.style.display = 'none';
-} else {
-    offline.style.display = 'contents';
-    online.style.display = 'none';
-    video.style.display = 'none';
-    play.style.display = 'flex';
-}
 
 function updateMediaSession(title, artist, artwork) {
   if ('mediaSession' in navigator) {
@@ -599,29 +584,49 @@ const thumbnailMobile = document.getElementById('thumbnail-mobile');
 
 const firstLoad = true;
 function getUpdatedInfo() {
-    fetch('https://monotonicradio.com/info', {
+    fetch('http://monotonicradio.com:8000/status-json.xsl', {
         method: 'GET'
     })
     .then(function(response) { return response.json(); })
     .then(function(json) {
-        if (json['thumbnail'] != thumbnail.getAttribute('href')) {
-            console.log(thumbnail.getAttribute('href'));
-            thumbnail.setAttribute('href', json['thumbnail']);
-            thumbnailMobile.setAttribute('href', json['thumbnail']);
+        let url = json["icestats"]["source"]["server_url"];
+        if (url) {
+              online.style.display = 'contents';
+              offline.style.display = 'none';
+              video.style.display = 'block';
+              play.style.display = 'none';
+              stream.src = url;
+        } else {
+              offline.style.display = 'contents';
+              online.style.display = 'none';
+              video.style.display = 'none';
+              play.style.display = 'flex';
+
+              fetch('https://monotonicradio.com/info', {
+                  method: 'GET'
+              })
+              .then(function(response) { return response.json(); })
+              .then(function(json) {
+                  if (json['thumbnail'] != thumbnail.getAttribute('href')) {
+                      console.log(thumbnail.getAttribute('href'));
+                      thumbnail.setAttribute('href', json['thumbnail']);
+                      thumbnailMobile.setAttribute('href', json['thumbnail']);
+                  }
+                  const remainingTime = Number(json['duration']) - Number(json['elapsed']);
+                  const endTime = new Date();
+                  endTime.setSeconds(endTime.getSeconds() + remainingTime);
+                  nowPlaying.innerHTML = json['now_playing'] + '<span style="font-family:Archivo Regular;"> - (Re-Run) - Until ' +  endTime.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true }) + '</span>';
+                  
+                  const archiveText = "&nbsp;&nbsp;In the meantime, please enjoy Monotonic's digital archive selection.".repeat(10)
+                  if (showText) showText.innerHTML = archiveText;
+                  if (showTextMobile) showTextMobile.innerHTML = archiveText;
+
+                  titleInfo.innerHTML = json['now_playing'];
+                  descriptionInfo.innerHTML = json['video_description'].replace(/\n/g, '<br>');
+
+                  updateMediaSession(json['now_playing'], 'Monotonic Radio', 'assets/mtr.jpg');
+              });
         }
-        const remainingTime = Number(json['duration']) - Number(json['elapsed']);
-        const endTime = new Date();
-        endTime.setSeconds(endTime.getSeconds() + remainingTime);
-        nowPlaying.innerHTML = json['now_playing'] + '<span style="font-family:Archivo Regular;"> - (Re-Run) - Until ' +  endTime.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true }) + '</span>';
-        
-        const archiveText = "&nbsp;&nbsp;In the meantime, please enjoy Monotonic's digital archive selection.".repeat(10)
-        if (showText) showText.innerHTML = archiveText;
-        if (showTextMobile) showTextMobile.innerHTML = archiveText;
-
-        titleInfo.innerHTML = json['now_playing'];
-        descriptionInfo.innerHTML = json['video_description'].replace(/\n/g, '<br>');
-
-        updateMediaSession(json['now_playing'], 'Monotonic Radio', 'assets/mtr.jpg');
     });
 }
 
