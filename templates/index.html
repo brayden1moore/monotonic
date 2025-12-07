@@ -51,6 +51,8 @@
       <iframe id="chat" src="https://monotonicradio1.chatango.com/" class="scroll-transition-fade"></iframe>
     </div>
 
+    <div id="circles">
+
     <div id="circle" >
         <svg class="thumbnail" height="650" width="650">
             <defs>
@@ -100,7 +102,8 @@
             <svg id="play-icon-circle-mobile" xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 100 100"><path fill="white" stroke="black" d="M50 3L3 97h94z"/></svg>
             <svg id="pause-icon-circle-mobile" xmlns="http://www.w3.org/2000/svg" version="1.0" width="50" height="50" viewBox="0 0 1262.000000 1280.000000" preserveAspectRatio="xMidYMid meet"><g transform="translate(0.000000,1280.000000) scale(0.100000,-0.100000)" fill="#FFFFFF" stroke="black"  stroke-width="100"><path d="M669 12214 c-59 -18 -130 -81 -160 -141 l-24 -48 0 -5650 0 -5650 23 -47 c13 -26 43 -65 67 -87 83 -77 -104 -71 2295 -71 2400 0 2212 -6 2295 71 24 23 54 62 67 87 l23 47 0 5650 0 5650 -23 47 c-13 25 -43 64 -67 87 -83 77 105 71 -2299 70 -1824 0 -2158 -3 -2197 -15z"/><path d="M7542 12211 c-63 -22 -123 -76 -155 -141 l-22 -45 0 -5650 0 -5650 23 -47 c13 -25 43 -64 67 -87 83 -77 -105 -71 2295 -71 2399 0 2212 -6 2295 71 24 22 54 61 67 87 l23 47 0 5650 0 5650 -24 48 c-31 63 -101 123 -164 142 -44 13 -321 15 -2201 15 -2062 -1 -2153 -1 -2204 -19z"/></g></svg>
         </div>
-    
+      
+    </div>
   </div>
 
 <div id="info-div" >
@@ -495,7 +498,9 @@
 
 const play = document.getElementById('play');
 const circle = document.getElementById('circle');
+const circles = document.getElementById('circles');
 const circleMobile = document.getElementById('circle-mobile');
+const infoDiv = document.getElementById('info-div');
 const audio = document.getElementById('audio');
 const pauseIcon = document.getElementById('pause-icon');
 const playIcon = document.getElementById('play-icon');
@@ -589,19 +594,23 @@ function getUpdatedInfo() {
       .then(function(json) {
           if (json['youtube_link']) {
               let url = json['youtube_link'];
-                    online.style.display = 'contents';
-                    offline.style.display = 'none';
-                    video.style.display = 'block';
-                    play.style.display = 'none';
-                    if (stream.src != url) {
-                      stream.src = url;
-                    }
+              online.style.display = 'contents';
+              offline.style.display = 'none';
+              video.style.display = 'block';
+              
+              circles.style.display = 'none';
+
+              if (stream.src != url) {
+                stream.src = url;
+              }
           }
           else {
             offline.style.display = 'contents';
             online.style.display = 'none';
             video.style.display = 'none';
             play.style.display = 'flex';
+
+            circles.style.display = 'block';
 
             if (json['thumbnail'] != thumbnail.getAttribute('href')) {
                 console.log(thumbnail.getAttribute('href'));
@@ -619,9 +628,10 @@ function getUpdatedInfo() {
 
             titleInfo.innerHTML = json['now_playing'];
             descriptionInfo.innerHTML = json['video_description'].replace(/\n/g, '<br>');
-
-            updateMediaSession(json['now_playing'], 'Monotonic Radio', 'assets/mtr.jpg');
+            
           }
+          
+          updateMediaSession(json['now_playing'], 'Monotonic Radio', 'assets/mtr.jpg');
       });
 }
 
