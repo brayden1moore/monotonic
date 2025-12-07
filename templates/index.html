@@ -627,16 +627,16 @@ function getUpdatedInfo() {
           if (json['source']=='live') {
               let url = json['youtube_link'];
               if (url.contains('youtube')) {
-                if (stream.src != url) {
-                  stream.style.display = 'block';
-                  stream.src = url;
+                if (streamEmbed.src != url) {
+                  streamEmbed.style.display = 'block';
+                  streamEmbed.src = url;
                   audio.src = audio.src;
                   chat.src = "https://monotonicradio1.chatango.com/";
                 }
               }
               else {
                 noVideo.style.display = 'block';
-                stream.style.display = 'none';
+                streamEmbed.style.display = 'none';
               }
               online.style.display = 'contents';
               offline.style.display = 'none';
