@@ -274,10 +274,10 @@ def hello():
 @app.route('/info')
 def get_info():
     resp = requests.get("http://monotonicradio.com:8000/status-json.xsl").json()
-    print(resp)
-    if resp.get('source'):
 
-        info = resp['source']
+    if resp.get('icestats', {}).get('source'):
+
+        info = resp['icestats']['source']
         genres = info.get('genre') or ''
         return {
             'now_playing': info.get('server_name'),
