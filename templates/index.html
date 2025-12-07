@@ -592,6 +592,11 @@ function getUpdatedInfo() {
       .then(function(json) {
           if (json['youtube_link']) {
               let url = json['youtube_link'];
+              if (url) {
+                if (stream.src != url) {
+                  stream.src = url;
+                }
+              }
               online.style.display = 'contents';
               offline.style.display = 'none';
               if (window.innerWidth < 769) {
@@ -600,13 +605,9 @@ function getUpdatedInfo() {
               else {
                   video.style.display = 'flex';
               }
-              nowPlaying.innerHTML = json['now_playing'] + " LIVE (Audio Only)";
+              nowPlaying.innerHTML = json['now_playing'] + '<span style="font-family:Archivo Regular;"> - (LIVE) - Audio</span>';
               
               circles.style.display = 'none';
-
-              if (stream.src != url) {
-                stream.src = url;
-              }
           }
           else {
             offline.style.display = 'contents';
