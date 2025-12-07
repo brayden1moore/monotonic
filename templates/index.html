@@ -391,7 +391,7 @@
     border: none;
     top: 0;
     left: 0;
-    width: 100%;
+    width: 90%;
     height: auto;
   }
 
@@ -463,8 +463,8 @@
       }
 
       #video iframe {
-          width: 955px;
-          height: 538px;
+          width: auto;
+          height: auto;
       }
 
       #video {
@@ -598,6 +598,7 @@ function getUpdatedInfo() {
               online.style.display = 'contents';
               offline.style.display = 'none';
               video.style.display = 'block';
+              nowPlaying.innerHTML = json['now_playing'];
               
               circles.style.display = 'none';
 
