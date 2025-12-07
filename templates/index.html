@@ -627,10 +627,10 @@ function getUpdatedInfo() {
             if (showText) showText.innerHTML = archiveText;
             if (showTextMobile) showTextMobile.innerHTML = archiveText;
 
-            titleInfo.innerHTML = json['now_playing'];
-            descriptionInfo.innerHTML = json['video_description'];//.replace(/\n/g, '<br>');
-            descriptionInfo.style.whiteSpace = 'pre-wrap';
           }
+
+          titleInfo.innerHTML = json['now_playing'];
+          descriptionInfo.innerHTML = json['video_description'].replace(/\n/g, '<br>');
           
           updateMediaSession(json['now_playing'], 'Monotonic Radio', 'assets/mtr.jpg');
       });
