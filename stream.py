@@ -279,11 +279,15 @@ def get_info():
 
         info = resp['icestats']['source']
         genres = info.get('genre') or ''
+        yt_link = info.get('server_url')
+        if yt_link:
+            yt_link = yt_link.replace('/watch','/embed')
+        
         return {
             'now_playing': info.get('server_name'),
             'video_description': info.get('server_description'),
             'genres': [i.strip() for i in genres.split(',')],
-            'youtube_link': info.get('server_url'),
+            'youtube_link': yt_link,
             'duration': None,
             'elapsed': None,
             'byterate': None,
