@@ -282,7 +282,7 @@ def get_info():
         return {
             'now_playing': info.get('server_name'),
             'video_description': info.get('server_description'),
-            'genres': genres.split(','),
+            'genres': [i.strip() for i in genres.split(',')],
             'youtube_link': info.get('server_url'),
             'duration': None,
             'elapsed': None,
