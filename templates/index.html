@@ -47,7 +47,10 @@
     <i></i>
 
     <div id="stream-and-chat">
-      <div id="video"><iframe id="stream" src="" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>
+      <div id="video">
+        <img id="no-video" src="assets/novideo.gif" style="display: none;">
+        <iframe id="stream" src="" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+      </div>
       <iframe id="chat" src="https://monotonicradio1.chatango.com/" class="scroll-transition-fade"></iframe>
     </div>
 
@@ -393,6 +396,15 @@
     aspect-ratio: 16 / 9
   }
 
+  #no-video {
+      background-color: white;
+      border: none;
+      top: 0;
+      left: 0;
+      width: 90%;
+      aspect-ratio: 16 / 9
+  }
+
   .live-icon {
     position: relative;
     top: 8px;
@@ -452,6 +464,10 @@
           width: 100%;
        }
 
+       #stream {
+          width: 100%;
+       }
+
        #stream-and-chat {
         margin-top: 25px;
        }
@@ -503,6 +519,7 @@
 
 const play = document.getElementById('play');
 const circle = document.getElementById('circle');
+const noVideo = document.getElementById('no-video');
 const circles = document.getElementById('circles');
 const circleMobile = document.getElementById('circle-mobile');
 const infoDiv = document.getElementById('info-div');
@@ -603,8 +620,13 @@ function getUpdatedInfo() {
               let url = json['youtube_link'];
               if (url) {
                 if (stream.src != url) {
+                  stream.style.display = 'block';
                   stream.src = url;
                 }
+              }
+              else {
+                noVideo.style.display = 'block';
+                stream.style.display = 'none';
               }
               online.style.display = 'contents';
               offline.style.display = 'none';
