@@ -629,7 +629,7 @@ function getUpdatedInfo() {
 
             titleInfo.innerHTML = json['now_playing'];
             descriptionInfo.innerHTML = json['video_description'].replace(/\n/g, '<br>');
-            
+            descriptionInfo.style.whiteSpace = 'pre-wrap';
           }
           
           updateMediaSession(json['now_playing'], 'Monotonic Radio', 'assets/mtr.jpg');
