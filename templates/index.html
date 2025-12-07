@@ -593,7 +593,9 @@ function getUpdatedInfo() {
                     offline.style.display = 'none';
                     video.style.display = 'block';
                     play.style.display = 'none';
-                    stream.src = url;
+                    if (stream.src != url) {
+                      stream.src = url;
+                    }
           }
           else {
             offline.style.display = 'contents';
