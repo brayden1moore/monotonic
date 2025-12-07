@@ -318,7 +318,8 @@ def get_info():
             'duration': None,
             'elapsed': None,
             'byterate': None,
-            'thumbnail': None
+            'thumbnail': None,
+            'source':'live'
         }
     
     else:
@@ -331,7 +332,8 @@ def get_info():
             'genres': archive_dict[id]['genres'],
             'elapsed': round(video_elapsed),
             'byterate': byterate,
-            'thumbnail': get_thumbnail(id)
+            'thumbnail': get_thumbnail(id),
+            'source':'archive'
         }
 
 

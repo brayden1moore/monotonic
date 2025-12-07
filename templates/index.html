@@ -616,10 +616,9 @@ function getUpdatedInfo() {
       })
       .then(function(response) { return response.json(); })
       .then(function(json) {
-          if (json['youtube_link']) {
+          if (json['source']=='live') {
               let url = json['youtube_link'];
               if (url instanceof String && url != 'null') {
-                console.log(url);
                 if (stream.src != url) {
                   stream.style.display = 'block';
                   stream.src = url;
