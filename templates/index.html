@@ -345,7 +345,7 @@
     position: relative;
     overflow: hidden !important;
     background-color: rgba(74, 128, 255,1);
-    transition: background-color 0.2s ease-in-out;
+    transition: background-color 0.1s ease-in-out;
     cursor: pointer;
     padding-left: 20px;
     margin: auto;
@@ -429,9 +429,13 @@
     text-align: center;
   }
   #header {
-    margin-top: 45px;
-    font-family: 'Archivo Semibold';
-    font-size:24pt;
+    text-align: left;
+    padding: 10px 10px 20px;
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+    border-bottom-color: black;
+    font-family: "Archivo Semibold";
+    font-size: 24pt;
     line-height: 0.5em;
   }
   @font-face {
@@ -645,7 +649,7 @@ getUpdatedInfo();
 setInterval(getUpdatedInfo, 3000);
 
 
-function setupMarquee(wrapperId, direction = 'right') {
+function setupMarquee(wrapperId, direction = 'left') {
   const wrapper = document.getElementById(wrapperId);
   if (!wrapper) return;
 
