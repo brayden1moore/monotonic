@@ -501,6 +501,7 @@ const infoDiv = document.getElementById('info-div');
 const audio = document.getElementById('audio');
 const pauseIcon = document.getElementById('pause-icon');
 const playIcon = document.getElementById('play-icon');
+const genres = document.getElementById('genres');
 const pauseIconCircle = document.getElementById('pause-icon-circle');
 const playIconCircle = document.getElementById('play-icon-circle');
 const pauseIconCircleMobile = document.getElementById('pause-icon-circle-mobile');
@@ -635,7 +636,7 @@ function getUpdatedInfo() {
 
           titleInfo.innerHTML = json['now_playing'];
           descriptionInfo.innerHTML = json['video_description'].replace(/\n/g, '<br>');
-          
+          genres.textContent = json['genres'].join(', ');
           updateMediaSession(json['now_playing'], 'Monotonic Radio', 'assets/mtr.jpg');
       });
 }
