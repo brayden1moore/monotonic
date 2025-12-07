@@ -389,6 +389,8 @@
     border: none;
     top: 0;
     left: 0;
+    width: 90%;
+    aspect-ratio: 16 / 9
   }
 
   .live-icon {
@@ -588,9 +590,6 @@ function getUpdatedInfo() {
               nowPlaying.innerHTML = json['now_playing'];
               
               circles.style.display = 'none';
-
-              streamEmbed.style.width = window.innerWidth - 150 + 'px';
-              streamEmbed.style.height = (window.innerWidth - 150) * 0.5625 + 'px';
 
               if (stream.src != url) {
                 stream.src = url;
