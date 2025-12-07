@@ -613,12 +613,14 @@ function getUpdatedInfo() {
               nowPlaying.innerHTML = json['now_playing'] + '<span style="font-family:Archivo Regular;"> - (LIVE) - Audio</span>';
               
               circles.style.display = 'none';
+              infoDiv.style.display = 'none';
           }
           else {
             offline.style.display = 'contents';
             online.style.display = 'none';
             video.style.display = 'none';
             play.style.display = 'flex';
+            infoDiv.style.display = 'flex';
 
             circles.style.display = 'block';
 
