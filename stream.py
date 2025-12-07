@@ -276,10 +276,11 @@ def get_info():
     resp = requests.get("http://monotonicradio.com:8000/status-json.xsl").json()
     if resp.get('source'):
         info = resp['source']
+        genres = info.get('genre') or ''
         return {
             'now_playing': info.get('server_name'),
             'video_description': info.get('server_description'),
-            'genres': info.get('genre'),
+            'genres': genres.split(','),
             'youtube_link': info.get('server_url'),
             'duration': None,
             'elapsed': None,
