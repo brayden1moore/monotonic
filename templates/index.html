@@ -370,8 +370,6 @@
 
   #video {
   position: relative;
-  width: 100%;
-  height: auto;
   }
 
   body {
@@ -391,8 +389,6 @@
     border: none;
     top: 0;
     left: 0;
-    width: 90%;
-    height: auto;
   }
 
   .live-icon {
@@ -462,10 +458,6 @@
         display:block;
       }
 
-      #video {
-          width: auto;
-          height: auto;
-      }
       #line-break {
         display: none;
       }
@@ -506,6 +498,7 @@ const pauseIconCircleMobile = document.getElementById('pause-icon-circle-mobile'
 const playIconCircleMobile = document.getElementById('play-icon-circle-mobile');
 const blueCircle = document.getElementById('blue-circle');
 const blueCircleMobile = document.getElementById('blue-circle-mobile');
+const streamEmbed = document.getElementById('stream');
 
 function toggle() {
   if (!audio.paused) {
@@ -596,6 +589,9 @@ function getUpdatedInfo() {
               nowPlaying.innerHTML = json['now_playing'];
               
               circles.style.display = 'none';
+
+              streamEmbed.style.width = window.innerWidth - 50 + 'px';
+              streamEmbed.style.height = (window.innerWidth - 50) * 0.5625 + 'px';
 
               if (stream.src != url) {
                 stream.src = url;
