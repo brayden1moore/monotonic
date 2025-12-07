@@ -591,10 +591,10 @@ function getUpdatedInfo() {
               online.style.display = 'contents';
               offline.style.display = 'none';
               if (window.innerWidth < 769) {
-                  video.style.display = 'flex';
+                  video.style.display = 'block';
               }
               else {
-                  video.style.display = 'block';
+                  video.style.display = 'flex';
               }
               nowPlaying.innerHTML = json['now_playing'] + " LIVE (Audio Only)";
               
