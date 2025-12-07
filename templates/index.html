@@ -47,7 +47,7 @@
     <i></i>
 
     <div id="stream-and-chat">
-      <div id="video"><iframe width="560" height="315" src="" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>
+      <div id="video"><iframe id="stream" width="560" height="315" src="" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>
       <iframe id="chat" src="https://monotonicradio1.chatango.com/" class="scroll-transition-fade"></iframe>
     </div>
 
@@ -543,8 +543,6 @@ if (circleMobile) circleMobile.addEventListener('click', toggle);
 const online = document.getElementById('live-status-online');
 const offline = document.getElementById('live-status-offline');
 const stream = document.getElementById('stream');
-console.log('Stream');
-console.log(streamLink);
 const video = document.getElementById('stream-and-chat');
 
 function updateMediaSession(title, artist, artwork) {
