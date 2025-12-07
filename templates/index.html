@@ -582,7 +582,7 @@ const thumbnailMobile = document.getElementById('thumbnail-mobile');
 
 const firstLoad = true;
 function getUpdatedInfo() {
-    fetch('http://monotonicradio.com:8000/status-json.xsl', {
+    fetch('https://monotonicradio.com:8000/status-json.xsl', {
         method: 'GET'
     })
     .then(function(response) { return response.json(); })
