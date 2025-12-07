@@ -626,6 +626,7 @@ function getUpdatedInfo() {
       .then(function(json) {
           if (json['source']=='live') {
               let url = json['youtube_link'];
+              console.log(url);
               if (url instanceof String && url != 'null') {
                 console.log(url);
                 if (stream.src != url) {
