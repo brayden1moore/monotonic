@@ -406,7 +406,6 @@
     font-family: 'Archivo Regular';
   }
   #stream-and-chat {
-    margin-top: 50px;
     justify-content: center;
     display: block;
   }
@@ -590,8 +589,8 @@ function getUpdatedInfo() {
               
               circles.style.display = 'none';
 
-              streamEmbed.style.width = window.innerWidth - 50 + 'px';
-              streamEmbed.style.height = (window.innerWidth - 50) * 0.5625 + 'px';
+              streamEmbed.style.width = window.innerWidth - 150 + 'px';
+              streamEmbed.style.height = (window.innerWidth - 150) * 0.5625 + 'px';
 
               if (stream.src != url) {
                 stream.src = url;
