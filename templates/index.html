@@ -582,51 +582,45 @@ const thumbnailMobile = document.getElementById('thumbnail-mobile');
 
 const firstLoad = true;
 function getUpdatedInfo() {
-    fetch('http://monotonicradio.com:8000/status-json.xsl', {
-        method: 'GET'
-    })
-    .then(function(response) { return response.json(); })
-    .then(function(json) {
-        let url = json["icestats"]["source"]["server_url"];
-        if (url) {
-              console.log
-              online.style.display = 'contents';
-              offline.style.display = 'none';
-              video.style.display = 'block';
-              play.style.display = 'none';
-              stream.src = url;
-        } else {
-              offline.style.display = 'contents';
-              online.style.display = 'none';
-              video.style.display = 'none';
-              play.style.display = 'flex';
+      fetch('https://monotonicradio.com/info', {
+          method: 'GET'
+      })
+      .then(function(response) { return response.json(); })
+      .then(function(json) {
+          if (json['youtube_link']) {
+              let url = json['youtube_link'];
+                    online.style.display = 'contents';
+                    offline.style.display = 'none';
+                    video.style.display = 'block';
+                    play.style.display = 'none';
+                    stream.src = url;
+          }
+          else {
+            offline.style.display = 'contents';
+            online.style.display = 'none';
+            video.style.display = 'none';
+            play.style.display = 'flex';
 
-              fetch('https://monotonicradio.com/info', {
-                  method: 'GET'
-              })
-              .then(function(response) { return response.json(); })
-              .then(function(json) {
-                  if (json['thumbnail'] != thumbnail.getAttribute('href')) {
-                      console.log(thumbnail.getAttribute('href'));
-                      thumbnail.setAttribute('href', json['thumbnail']);
-                      thumbnailMobile.setAttribute('href', json['thumbnail']);
-                  }
-                  const remainingTime = Number(json['duration']) - Number(json['elapsed']);
-                  const endTime = new Date();
-                  endTime.setSeconds(endTime.getSeconds() + remainingTime);
-                  nowPlaying.innerHTML = json['now_playing'] + '<span style="font-family:Archivo Regular;"> - (Re-Run) - Until ' +  endTime.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true }) + '</span>';
-                  
-                  const archiveText = "&nbsp;&nbsp;In the meantime, please enjoy Monotonic's digital archive selection.".repeat(10)
-                  if (showText) showText.innerHTML = archiveText;
-                  if (showTextMobile) showTextMobile.innerHTML = archiveText;
+            if (json['thumbnail'] != thumbnail.getAttribute('href')) {
+                console.log(thumbnail.getAttribute('href'));
+                thumbnail.setAttribute('href', json['thumbnail']);
+                thumbnailMobile.setAttribute('href', json['thumbnail']);
+            }
+            const remainingTime = Number(json['duration']) - Number(json['elapsed']);
+            const endTime = new Date();
+            endTime.setSeconds(endTime.getSeconds() + remainingTime);
+            nowPlaying.innerHTML = json['now_playing'] + '<span style="font-family:Archivo Regular;"> - (Re-Run) - Until ' +  endTime.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true }) + '</span>';
+            
+            const archiveText = "&nbsp;&nbsp;In the meantime, please enjoy Monotonic's digital archive selection.".repeat(10)
+            if (showText) showText.innerHTML = archiveText;
+            if (showTextMobile) showTextMobile.innerHTML = archiveText;
 
-                  titleInfo.innerHTML = json['now_playing'];
-                  descriptionInfo.innerHTML = json['video_description'].replace(/\n/g, '<br>');
+            titleInfo.innerHTML = json['now_playing'];
+            descriptionInfo.innerHTML = json['video_description'].replace(/\n/g, '<br>');
 
-                  updateMediaSession(json['now_playing'], 'Monotonic Radio', 'assets/mtr.jpg');
-              });
-        }
-    });
+            updateMediaSession(json['now_playing'], 'Monotonic Radio', 'assets/mtr.jpg');
+          }
+      });
 }
 
 getUpdatedInfo();
