@@ -188,8 +188,7 @@ def generate_stream():
                     chunk_count += 1
 
 import subprocess
-def generate_live_stream():
-    youtube_url = "https://www.youtube.com/watch?v=mKCieTImjvU"
+def generate_live_stream(url):
     
     mpv_command = [
         "mpv",
@@ -199,7 +198,7 @@ def generate_live_stream():
         "--of=mp3",             
         "--oac=libmp3lame",    
         "--oacopts=b=128k",    
-        youtube_url
+        url
     ]
     
     print("Starting MPV direct stream...")
@@ -228,6 +227,28 @@ def generate_live_stream():
         if 'process' in locals():
             process.kill()
 
+def check_for_live():
+    resp = requests.get("http://monotonicradio.com:8000/status-json.xsl").json()
+
+    if not resp.get('icestats', {}).get('source'):
+        return None
+    else:
+        info = resp['icestats']['source']
+        yt_link = info.get('server_url')
+        if yt_link:
+            yt_link = yt_link.replace('/watch','/embed')
+
+        genres = info.get('genre') or ''
+        genres = [i.strip() for i in genres.split(',')]
+
+        return {
+            'genres':genres,
+            'yt_link':yt_link,
+            'name': info.get('server_name'),
+            'description': info.get('server_description')
+        }
+    
+
 @app.route('/test')
 def stream_live_mp3():
     return Response(
@@ -244,15 +265,29 @@ def stream_live_mp3():
 
 @app.route('/stream')
 def stream_mp3():
-    return Response(
-        generate_stream(),
-        mimetype='audio/mpeg',
-        headers={
-            'Cache-Control': 'no-cache, no-store, must-revalidate',
-            'Accept-Ranges': 'none',   
-            'Content-Type': 'audio/mpeg',
-        }
-    )
+    live_info = check_for_live()
+    if live_info:
+        return Response(
+            generate_live_stream('http://monotonicradio.com:8000/stream.m3u'),
+            mimetype='audio/mpeg',
+            headers={
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache',
+                'Expires': '0',
+                'Content-Type': 'audio/mpeg',
+                'X-Content-Type-Options': 'nosniff'
+            }
+        )
+    else :
+        return Response(
+            generate_stream(),
+            mimetype='audio/mpeg',
+            headers={
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Accept-Ranges': 'none',   
+                'Content-Type': 'audio/mpeg',
+            }
+        )
 
 def get_thumbnail(id):
     thumbnail = archive_dict[id]['thumbnail']
@@ -273,21 +308,13 @@ def hello():
 
 @app.route('/info')
 def get_info():
-    resp = requests.get("http://monotonicradio.com:8000/status-json.xsl").json()
-
-    if resp.get('icestats', {}).get('source'):
-
-        info = resp['icestats']['source']
-        genres = info.get('genre') or ''
-        yt_link = info.get('server_url')
-        if yt_link:
-            yt_link = yt_link.replace('/watch','/embed')
-        
+    live_info = check_for_live()
+    if live_info:
         return {
-            'now_playing': info.get('server_name'),
-            'video_description': info.get('server_description'),
-            'genres': [i.strip() for i in genres.split(',')],
-            'youtube_link': yt_link,
+            'now_playing': live_info['name'],
+            'video_description': live_info['description'],
+            'genres': live_info['genres'],
+            'youtube_link': live_info['yt_link'],
             'duration': None,
             'elapsed': None,
             'byterate': None,
