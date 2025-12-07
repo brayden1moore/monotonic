@@ -218,7 +218,6 @@ def generate_live_stream():
             if not chunk:
                 if process.poll() is not None:
                     stderr = process.stderr.read().decode('utf-8', errors='ignore')
-                    print(f"MPV ended. Last stderr: {stderr[-500:]}")
                 break
             
             yield chunk
@@ -274,17 +273,33 @@ def hello():
 
 @app.route('/info')
 def get_info():
-    current, id, mp3_path, video_elapsed, byterate = get_current()
+    resp = requests.get("http://monotonicradio.com:8000/status-json.xsl").json()
+    if resp.get('source'):
+        info = resp['source']
+        return {
+            'now_playing': info.get('server_name'),
+            'video_description': info.get('server_description'),
+            'genres': info.get('genre'),
+            'youtube_link': info.get('server_url'),
+            'duration': None,
+            'elapsed': None,
+            'byterate': None,
+            'thumbnail': None
+        }
+    
+    else:
+        current, id, mp3_path, video_elapsed, byterate = get_current()
 
-    return {
-        'now_playing': current,
-        'video_description': archive_dict[id]['description'],
-        'duration': archive_dict[id]['duration'],
-        'genres': archive_dict[id]['genres'],
-        'elapsed': round(video_elapsed),
-        'byterate': byterate,
-        'thumbnail': get_thumbnail(id)
-    }
+        return {
+            'now_playing': current,
+            'video_description': archive_dict[id]['description'],
+            'duration': archive_dict[id]['duration'],
+            'genres': archive_dict[id]['genres'],
+            'elapsed': round(video_elapsed),
+            'byterate': byterate,
+            'thumbnail': get_thumbnail(id)
+        }
+
 
 for id, _ in archive_dict.items():
     download_from_bucket(id)
