@@ -48,7 +48,7 @@
 
     <div id="stream-and-chat">
       <div id="video">
-        <img id="no-video" src="assets/novideo.gif" style="display: none;">
+        <img id="no-video" src="assets/novideo.gif" style="display: none;" onclick="toggle">
         <iframe id="stream" src="" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
       </div>
       <iframe id="chat" src="https://monotonicradio1.chatango.com/" class="scroll-transition-fade"></iframe>
@@ -397,6 +397,7 @@
   }
 
   #no-video {
+    cursor: pointer;
       background-color: white;
       border: none;
       top: 0;
