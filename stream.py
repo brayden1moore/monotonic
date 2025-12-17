@@ -308,7 +308,7 @@ def hello():
 
 @app.route('/shmoodguy')
 def shmoodguy():
-    return redirect("https://www.ticketmaster.com/user/order/kjwQYLe8ZrogvC7z6K325EKcJjCspBAnSupQhNcGcj5hXmOzH0D5RZRjTpEkqtc%3D/k7vGFbULIDLYs/view", code=302)
+    return redirect("https://www.ticketmaster.com/user/orders", code=302)
 
 @app.route('/info')
 def get_info():
