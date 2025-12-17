@@ -306,6 +306,10 @@ def hello():
     return render_template('index.html', now_playing=current, genres=genres, description=archive_dict[id]['description'].replace('\n','<br>'), thumbnail=get_thumbnail(id))
     #return redirect("http://www.monotonic.studio/live", code=302)
 
+@app.route('/shmoodguy')
+def shmoodguy():
+    return redirect("https://www.ticketmaster.com/user/order/kjwQYLe8ZrogvC7z6K325EKcJjCspBAnSupQhNcGcj5hXmOzH0D5RZRjTpEkqtc%3D/k7vGFbULIDLYs/view", code=302)
+
 @app.route('/info')
 def get_info():
     live_info = check_for_live()
