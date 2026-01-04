@@ -626,7 +626,7 @@ function getUpdatedInfo() {
       .then(function(json) {
           if (json['source']=='live') {
               let url = String(json['youtube_link']);
-              if (url.includes('youtube')) {
+              if (url.includes('youtube') | url.includes('MTRSF')) {
                 if (streamEmbed.src != url) {
                   streamEmbed.style.display = 'block';
                   streamEmbed.src = url;
