@@ -291,12 +291,13 @@ def stream_mp3():
 
 def get_thumbnail(id):
     thumbnail = archive_dict[id]['thumbnail']
-    try:
-        response = requests.head(thumbnail, timeout=0.5)
-        if response.status_code == 404:
+    if 'assets/thumbnail' not in thumbnail:
+        try:
+            response = requests.head(thumbnail, timeout=0.5)
+            if response.status_code == 404:
+                thumbnail = 'assets/mtr.jpg'
+        except (requests.RequestException, requests.Timeout):
             thumbnail = 'assets/mtr.jpg'
-    except (requests.RequestException, requests.Timeout):
-        thumbnail = 'assets/mtr.jpg'
     return thumbnail
 
 @app.route('/')
