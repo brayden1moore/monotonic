@@ -3,20 +3,14 @@ import time
 import json
 import boto3
 import random
-import yt_dlp
-import requests
 import tempfile
 import itertools
 import subprocess
-import scrapetube
 import urllib.parse
 from datetime import datetime
-from flask import Flask, send_file, Response
 from concurrent.futures import ThreadPoolExecutor
 import threading
-
 import subprocess
-import mutagen.mp3
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -24,6 +18,13 @@ logger = logging.getLogger(__name__)
 
 with open('archives.json', 'r') as f: 
     archive_dict = json.load(f)
+    keys_to_del = []
+    for key, val in archive_dict.items():
+        if ('Cuts In The Fog' in val['title']) & (key[0] != 'c'):
+            keys_to_del.append(key)
+
+    for i in keys_to_del:
+        del archive_dict[i]
 
 def upload_to_bucket(id):    
     session = boto3.session.Session()
