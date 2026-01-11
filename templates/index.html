@@ -41,14 +41,14 @@
       <audio id="audio" src="https://monotonicradio.com/stream"></audio><p id="now-playing">{{ now_playing }}</p>
     </div>
     
-    <div id="header">MONOTONIC RADIO &nbsp;<br id="line-break"><span id="live-status-offline">[<img src="assets/hourglass.png" class="live-icon"></img>OFFLINE ]</span><span id="live-status-online">[<img src="assets/play.png" class="live-icon"></img>ONLINE ]</span></div>
+    <div id="header"><img src="assets/mtr.jpg" height="40px" width="40px">MONOTONIC RADIO &nbsp;<br id="line-break"><span id="live-status-offline">[<img src="assets/hourglass.png" class="live-icon"></img>OFFLINE ]</span><span id="live-status-online">[<img src="assets/play.png" class="live-icon"></img>ONLINE ]</span></div>
 
-    <div id="pemdas"><br>
+    <div id="pemdas">
     <i></i>
 
     <div id="stream-and-chat">
       <div id="video">
-        <img id="no-video" src="assets/novideo.gif" style="display: none;" onclick="toggle()">
+        <img id="no-video" src="assets/novideo.png" style="display: none;" onclick="toggle()">
         <iframe id="stream" src="" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
       </div>
       <iframe id="chat" src="https://monotonicradio1.chatango.com/" class="scroll-transition-fade"></iframe>
@@ -363,8 +363,9 @@
   #chat {
     border: none; 
     width: 90%; 
-    height: 540px; 
+    height: 300px; 
     transition-duration: initial;
+    margin-bottom: 120px;
   }
 
   #line-break { 
@@ -417,6 +418,7 @@
   }
 
   #live-status {
+    display: none;
     font-family: 'Archivo Regular';
   }
   .message {
@@ -510,6 +512,7 @@
       }
       #chat {
         width: 300px;
+        height: 540px; 
       }
       #header {
         font-size: 38pt;
@@ -642,22 +645,22 @@ function getUpdatedInfo() {
                 noVideo.style.display = 'block';
                 streamEmbed.style.display = 'none';
               }
-              online.style.display = 'contents';
-              offline.style.display = 'none';
+              //online.style.display = 'contents';
+              //offline.style.display = 'none';
               if (window.innerWidth < window.innerHeight) {
                   video.style.display = 'block';
               }
               else {
                   video.style.display = 'flex';
               }
-              nowPlaying.innerHTML = json['now_playing'] + '<span style="font-family:Archivo Regular;"> - (LIVE) - Audio</span>';
+              nowPlaying.innerHTML = json['now_playing'] + '<span style="font-family:Archivo Regular;"> - (LIVE) - Audio Only</span>';
               
               circles.style.display = 'none';
               infoDiv.style.display = 'none';
           }
           else {
-            offline.style.display = 'contents';
-            online.style.display = 'none';
+            //offline.style.display = 'contents';
+            //online.style.display = 'none';
             video.style.display = 'none';
             play.style.display = 'flex';
             infoDiv.style.display = 'flex';

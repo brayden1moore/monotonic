@@ -279,6 +279,7 @@ def stream_mp3():
             }
         )
     else :
+        current_video, id, mp3_path, video_elapsed, bitrate = get_current()
         return Response(
             generate_stream(),
             mimetype='audio/mpeg',
