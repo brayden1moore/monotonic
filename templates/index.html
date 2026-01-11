@@ -128,21 +128,6 @@
 
   </div>
 
-  <div id="info-div-mobile" >
-        <div id="info-table">
-          <div id="title-info" class="blue">
-              {{ now_playing }}
-          </div>
-          <div id="genre-info">
-          Genres: <span id="genres">{{ genres }}</span>
-          </div>
-          <div id="description-info">
-          Tracklist:<br>
-            {{ description }}
-          </div>
-        </div>
-    </div>
-
   <div class="footer">
     <div id="link-grid">
         <a class="icon-link" href="https://www.youtube.com/@MonotonicRadio" target="_blank"><img class="icon" src="assets/yt.png"></img></a>
@@ -185,13 +170,7 @@
     padding: 10px;
     border-bottom: 1px solid black
   }
-
-  #info-div-mobile {
-    display: flex;
-  }
-
   #info-div {
-    display: none;
     margin-top: 30px;
     justify-content: center;
     display: flex;
@@ -544,14 +523,9 @@
       }
 
       #info-div {
-        display: flex;
         position: relative;
         left: 120px;
         margin-top: 30px;
-      }
-
-      #info-div-mobile {
-        display: none;
       }
 
       #circle-mobile {
