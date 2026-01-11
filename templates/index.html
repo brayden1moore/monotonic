@@ -128,15 +128,23 @@
 
   </div>
   <div id="residents">
-    <div class="resident" style="background-image: url(assets/residents/Afternoon.png);">
-      Afternoon Breakfast features easy listening music for whenever you want to wake up. SUNDAYS 12PM EASTERN.
+    <div class="resident">
+      <img class="resident-photo" src="assets/residents/Afternoon.png">
+      <div class="resident-text">
+        Afternoon Breakfast features easy listening music for whenever you want to wake up. SUNDAYS 2PM EASTERN.
+      </div>
+  </div>
+    <div class="resident">
+      <img class="resident-photo" src="assets/residents/Reading.png">
+      <div class="resident-text">
+      Reading For Now features readings and discussions about the geopolitical issues of today. SUNDAYS 2PM EASTERN.
+      </div>
     </div>
     <div class="resident">
-      <img class="resident-photo" style="background-image: url(assets/residents/Reading.png);">
-      Reading For Now features readings and discussions about the geopolitical issues of today. SUNDAYS 2PM EASTERN.
-    </div>
-    <div class="resident" style="background-image: url(assets/residents/Cuts.png);">
-      Cuts In The Fog features music with a focus on textural, rhythmic, and curatorial experimentation. SUNDAYS 3PM EASTERN.
+      <img class="resident-photo" src="assets/residents/Cuts.png">
+      <div class="resident-text">
+      Cuts In The Fog features music centering textural, rhythmic, and curatorial experimentation. SUNDAYS 3PM EASTERN.
+      </div>
     </div>
   </div>
 
@@ -156,9 +164,25 @@
     display: flex;
   }
 
-  .resident{
-    height: auto;
+  .resident {
     width: 34vw;
+    position: relative;
+  }
+
+  .resident-photo {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .resident-text {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
   }
 
   #genres {
