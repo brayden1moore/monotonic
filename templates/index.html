@@ -41,7 +41,7 @@
       <audio id="audio" src="https://monotonicradio.com/stream"></audio><p id="now-playing">{{ now_playing }}</p>
     </div>
     
-    <div id="header"><img src="assets/mtr.jpg" height="40px" width="40px">MONOTONIC RADIO &nbsp;<br id="line-break"><span id="live-status-offline">[<img src="assets/hourglass.png" class="live-icon"></img>OFFLINE ]</span><span id="live-status-online">[<img src="assets/play.png" class="live-icon"></img>ONLINE ]</span></div>
+    <div id="header"><img src="assets/mtr.jpg" height="45px" width="45px" style="margin-right:3px;">MONOTONIC RADIO &nbsp;<br id="line-break"><span id="live-status-offline">[<img src="assets/hourglass.png" class="live-icon"></img>OFFLINE ]</span><span id="live-status-online">[<img src="assets/play.png" class="live-icon"></img>ONLINE ]</span></div>
 
     <div id="pemdas">
     <i></i>
@@ -310,6 +310,10 @@
     display: none;
   }
 
+  #live-status-offline {
+    display: none;
+  }
+
   #play-icon {
     transform: rotate(90deg);
     margin-right: 15px;
@@ -450,14 +454,16 @@
     text-align: center;
   }
   #header {
-    text-align: left;
-    padding: 20px 18px 20px;
-    border-bottom-width: 1px;
-    border-bottom-style: solid;
-    border-bottom-color: black;
-    font-family: "Archivo Semibold";
-    font-size: 24pt;
-    line-height: 0.5em;
+  align-items: center;
+  display: flex;
+  text-align: left;
+  padding: 20px 18px 20px;
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+  border-bottom-color: black;
+  font-family: "Archivo Semibold";
+  font-size: 24pt;
+  line-height: 0.5em;
   }
   @font-face {
       font-family: "Archivo SemiBold";
