@@ -20,6 +20,9 @@
 
 <body>
   <div id="content">
+
+        <div id="header"><img id="logo" src="assets/mtr.jpg" height="45px" width="45px" style="margin-right:3px; margin-left: -5px;">Monotonic Radio &nbsp;<br id="line-break"><span id="live-status-offline">[<img src="assets/hourglass.png" class="live-icon"></img>OFFLINE ]</span><span id="live-status-online">[<img src="assets/play.png" class="live-icon"></img>ONLINE ]</span></div>
+
     <div id="play">
       <div class="colors">
           <div class="a-color blue"></div>
@@ -41,8 +44,6 @@
       <audio id="audio" src="https://monotonicradio.com/stream"></audio><p id="now-playing">{{ now_playing }}</p>
     </div>
     
-    <div id="header"><img id="logo" src="assets/mtr.jpg" height="45px" width="45px" style="margin-right:3px; margin-left: -5px;">Monotonic Radio &nbsp;<br id="line-break"><span id="live-status-offline">[<img src="assets/hourglass.png" class="live-icon"></img>OFFLINE ]</span><span id="live-status-online">[<img src="assets/play.png" class="live-icon"></img>ONLINE ]</span></div>
-
     <div id="pemdas">
     <i></i>
 
@@ -73,7 +74,7 @@
         </svg>
         <div class="circle-txt"><svg height="650" width="650">
             <path id="ellipse-id-r1" style="fill: none;" d="M25 325A300 300 0 1 1 625 325A300 300 0 1 1 25 325"></path>
-            <text><textPath xlink:href="#ellipse-id-r1"><tspan id="show-text">&nbsp;&nbsp;In the meantime, please enjoy Monotonic's digital archive selection.&nbsp;In the meantime, please enjoy Monotonic's digital archive selection.&nbsp;In the meantime, please enjoy Monotonic's digital archive selection.&nbsp;In the meantime, please enjoy Monotonic's digital archive selection.&nbsp;In the meantime, please enjoy Monotonic's digital archive selection.</tspan></textPath></text>
+            <text><textPath xlink:href="#ellipse-id-r1"><tspan id="show-text">&nbsp;&nbsp;While we're offline, please enjoy Monotonic's digital archive selection.&nbsp;While we're offline, please enjoy Monotonic's digital archive selection.&nbsp;While we're offline, please enjoy Monotonic's digital archive selection.&nbsp;While we're offline, please enjoy Monotonic's digital archive selection.&nbsp;While we're offline, please enjoy Monotonic's digital archive selection.</tspan></textPath></text>
         </svg></div>
         <div id="tune-in">
             <svg id="play-icon-circle" xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><path fill="white" stroke="black" style="border:1px solid black" d="M50 3L3 97h94z"/></svg>
@@ -98,7 +99,7 @@
         <div class="circle-txt">
             <svg height="325" width="325">
                 <path id="ellipse-id-mobile" style="fill: none;" d="M12.5 162.5A150 150 0 1 1 312.5 162.5A150 150 0 1 1 12.5 162.5"></path>
-                <text><textPath xlink:href="#ellipse-id-mobile"><tspan id="show-text-mobile">&nbsp;&nbsp;In the meantime, please enjoy Monotonic's digital archive selection  {{ now_playing }}</tspan></textPath></text>
+                <text><textPath xlink:href="#ellipse-id-mobile"><tspan id="show-text-mobile">&nbsp;&nbsp;While we're offline, please enjoy Monotonic's digital archive selection  {{ now_playing }}</tspan></textPath></text>
             </svg>
         </div>
         <div id="tune-in">
@@ -128,7 +129,7 @@
 
   <div class="footer">
     <div id="link-grid">
-        <a class="icon-link" href="https://www.youtube.com/@MonotonicStudio" target="_blank"><img class="icon" src="assets/yt.png"></img></a>
+        <a class="icon-link" href="https://www.youtube.com/@MonotonicRadio" target="_blank"><img class="icon" src="assets/yt.png"></img></a>
         <a class="icon-link" href="https://soundcloud.com/monotonicradio" target="_blank"><img class="icon" style="height:90%; margin-top:-6px" src="assets/sc.png"></img></a>
         <a class="icon-link" href="https://www.instagram.com/monotonicradio/" target="_blank" ><img class="icon" src="assets/ig.png"></img></a>
     </div>
@@ -695,7 +696,7 @@ function getUpdatedInfo() {
             endTime.setSeconds(endTime.getSeconds() + remainingTime);
             nowPlaying.innerHTML = json['now_playing'] + '<span style="font-family:Archivo Regular;"> - (Re-Run) - Until ' +  endTime.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true }) + '</span>';
             
-            const archiveText = "&nbsp;&nbsp;In the meantime, please enjoy Monotonic's digital archive selection.".repeat(10)
+            const archiveText = "&nbsp;&nbsp;While we're offline, please enjoy Monotonic's digital archive selection.".repeat(10)
             if (showText) showText.innerHTML = archiveText;
             if (showTextMobile) showTextMobile.innerHTML = archiveText;
 
