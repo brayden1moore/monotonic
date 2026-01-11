@@ -41,7 +41,7 @@
       <audio id="audio" src="https://monotonicradio.com/stream"></audio><p id="now-playing">{{ now_playing }}</p>
     </div>
     
-    <div id="header"><img id="logo" src="assets/mtr.jpg" height="45px" width="45px" style="margin-right:3px;">Monotonic Radio &nbsp;<br id="line-break"><span id="live-status-offline">[<img src="assets/hourglass.png" class="live-icon"></img>OFFLINE ]</span><span id="live-status-online">[<img src="assets/play.png" class="live-icon"></img>ONLINE ]</span></div>
+    <div id="header"><img id="logo" src="assets/mtr.jpg" height="45px" width="45px" style="margin-right:3px; margin-left: -5px;">Monotonic Radio &nbsp;<br id="line-break"><span id="live-status-offline">[<img src="assets/hourglass.png" class="live-icon"></img>OFFLINE ]</span><span id="live-status-online">[<img src="assets/play.png" class="live-icon"></img>ONLINE ]</span></div>
 
     <div id="pemdas">
     <i></i>
@@ -483,7 +483,7 @@
       }
 
         #header {
-          padding: 20px 18px 20px;
+          padding: 5px 18px 5px;
         }
 
 
@@ -530,7 +530,7 @@
         height: 540px; 
       }
       #header {
-        font-size: 38pt;
+        font-size: 28pt;
       }
       .live-icon {
         top: 10px;
@@ -647,6 +647,13 @@ function getUpdatedInfo() {
       .then(function(response) { return response.json(); })
       .then(function(json) {
           if (json['source']=='live') {
+              if (window.innerWidth < window.innerHeight) {
+                  video.style.display = 'block';
+              }
+              else {
+                  video.style.display = 'flex';
+              }
+
               let url = String(json['youtube_link']);
               if (url.includes('youtube') | url.includes('meshcast')) {
                 if (streamEmbed.src != url) {
@@ -663,12 +670,7 @@ function getUpdatedInfo() {
               }
               //online.style.display = 'contents';
               //offline.style.display = 'none';
-              if (window.innerWidth < window.innerHeight) {
-                  video.style.display = 'block';
-              }
-              else {
-                  video.style.display = 'flex';
-              }
+
               nowPlaying.innerHTML = json['now_playing'] + '<span style="font-family:Archivo Regular;"> - (LIVE) - Audio Only</span>';
               
               circles.style.display = 'none';
