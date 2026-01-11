@@ -591,6 +591,7 @@ function toggle() {
     //if (blueCircleMobile) blueCircleMobile.style.opacity = 0.8;
   }
   else {
+    orgs.style.display = 'flex';
     audio.play();
     setupMarquee('play');
     playIcon.style.display = 'none';
@@ -601,7 +602,6 @@ function toggle() {
     pauseIconCircleMobile.style.display = 'block';
     play.style.background = 'rgba(0,0,0,0) !important';
     play.style.color = 'white';
-    orgs.style.display = 'flex';
     //if (blueCircle) blueCircle.style.opacity = 0;
     //if (blueCircleMobile) blueCircleMobile.style.opacity = 0;
   }
