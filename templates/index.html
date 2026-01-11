@@ -327,7 +327,6 @@
 }
 
 .footer{
-  border-bottom: 1px solid black;
   position: relative;
   background-color: white;
   bottom: -9px;
@@ -337,7 +336,7 @@
   font-family: verdana;
   width: 100%;
   height: 70px;
-  margin-top: 30px;
+  margin-top: 0px;
   display: flex;
   border-top-width: 1px;
   border-top-style: solid;
@@ -358,6 +357,7 @@
   }
 
   #pemdas {
+    background-color: rgb(74, 128, 255);
     padding-top: 25px;
     display: block;
     margin-top: 131px;
@@ -440,6 +440,7 @@
   }
 
   #video {
+    width: 95%;
     aspect-ratio: 16 /9;
     display: flex;
     justify-content: center;
@@ -447,7 +448,6 @@
   }
 
   body {
-    background-color: rgb(74, 128, 255);
     padding: 0;
     margin: 0;
     width: 100%;
@@ -741,7 +741,7 @@ function getUpdatedInfo() {
       .then(function(json) {
           if (json['source']=='live') {
               if (window.innerWidth < window.innerHeight) {
-                  video.style.display = 'block';
+                  video.style.display = 'flex';
               }
               else {
                   video.style.display = 'flex';
