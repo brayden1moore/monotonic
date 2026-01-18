@@ -745,7 +745,7 @@ function getUpdatedInfo() {
       .then(function(response) { return response.json(); })
       .then(function(json) {
           if (json['source']=='live') {
-              audio.src = "http://monotonicradio.com:8000/stream.m3u";
+              audio.src = "https://monotonicradio.com/stream";
               
               if (window.innerWidth < window.innerHeight) {
                   video.style.display = 'flex';
