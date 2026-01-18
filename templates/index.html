@@ -745,6 +745,8 @@ function getUpdatedInfo() {
       .then(function(response) { return response.json(); })
       .then(function(json) {
           if (json['source']=='live') {
+              audio.src = "http://monotonicradio.com:8000/stream.m3u";
+              
               if (window.innerWidth < window.innerHeight) {
                   video.style.display = 'flex';
               }
@@ -757,7 +759,6 @@ function getUpdatedInfo() {
                 if (streamEmbed.src != url) {
                   streamEmbed.style.display = 'block';
                   streamEmbed.src = url;
-                  audio.src = audio.src;
                   //chat.src = "https://monotonicradio1.chatango.com/";
                 }
               }
@@ -775,6 +776,8 @@ function getUpdatedInfo() {
               infoDiv.style.display = 'none';
           }
           else {
+            audio.src = "https://monotonicradio.com/stream";
+
             //offline.style.display = 'contents';
             //online.style.display = 'none';
             video.style.display = 'none';
