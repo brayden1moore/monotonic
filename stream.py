@@ -135,7 +135,7 @@ def generate_stream():
         stream_elapsed = time.time() - stream_absolute_start
         
         start_byte = int(video_elapsed * bitrate)
-        logger.info(f"Video {id}: seeking to byte {start_byte} ({video_elapsed:.1f}s)")
+        logger.info(f"Audio {id}: seeking to byte {start_byte} ({video_elapsed:.1f}s)")
         
         with open(mp3_path, 'rb') as f:
             f.seek(start_byte)
@@ -188,6 +188,57 @@ def generate_stream():
                     chunk_count += 1
 
 import subprocess
+
+def generate_stream_ffmpeg():
+    logging.info('generating stream started')
+    
+    while True:
+        current_video, id, mp3_path, video_elapsed, bitrate = get_current()
+        
+        if not os.path.exists(mp3_path):
+            logger.warning(f"File not found: {mp3_path}")
+            time.sleep(0.5)
+            continue
+        
+        logger.info(f"Audio {id}: starting from {video_elapsed:.1f}s")
+        
+        cmd = [
+            'ffmpeg',
+            '-ss', str(video_elapsed),
+            '-i', mp3_path,
+            '-f', 'mp3',
+            '-b:a', '128k',           # Constant bitrate
+            '-ar', '44100',           # Sample rate
+            '-'
+        ]
+        
+        process = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+            bufsize=8192
+        )
+        
+        try:
+            while True:
+                # Check if we need to switch videos
+                new_video, new_id, _, _, _ = get_current()
+                if new_id != id:
+                    logger.info(f"Switch: {id} -> {new_id}")
+                    process.terminate()
+                    break
+                
+                chunk = process.stdout.read(8192)
+                if not chunk:
+                    break
+                    
+                yield chunk
+                
+        finally:
+            process.terminate()
+            process.wait()
+
+
 def generate_live_stream(url):
     
     mpv_command = [
@@ -250,17 +301,21 @@ def check_for_live():
     
 
 @app.route('/test')
-def stream_live_mp3():
+def stream_ffmpeg_mp3():
     return Response(
-        generate_live_stream(),
+        generate_stream_ffmpeg(),
         mimetype='audio/mpeg',
         headers={
             'Cache-Control': 'no-cache, no-store, must-revalidate',
             'Pragma': 'no-cache',
             'Expires': '0',
             'Content-Type': 'audio/mpeg',
-            'X-Content-Type-Options': 'nosniff'
-        }
+            'X-Content-Type-Options': 'nosniff',
+            'Transfer-Encoding': 'chunked',
+            'Accept-Ranges': 'none', 
+            'Connection': 'keep-alive'
+        },
+        direct_passthrough=True 
     )
 
 @app.route('/stream')
