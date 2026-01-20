@@ -207,8 +207,8 @@ def generate_stream_ffmpeg():
             '-ss', str(video_elapsed),
             '-i', mp3_path,
             '-f', 'mp3',
-            '-b:a', '128k',           # Constant bitrate
-            '-ar', '44100',           # Sample rate
+            '-b:a', '128k',           
+            '-ar', '44100',           
             '-'
         ]
         
@@ -221,7 +221,6 @@ def generate_stream_ffmpeg():
         
         try:
             while True:
-                # Check if we need to switch videos
                 new_video, new_id, _, _, _ = get_current()
                 if new_id != id:
                     logger.info(f"Switch: {id} -> {new_id}")
