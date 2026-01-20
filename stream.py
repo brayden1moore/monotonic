@@ -191,52 +191,115 @@ import subprocess
 
 def generate_stream_ffmpeg():
     logging.info('generating stream started')
+    last_live_check = 0
+    LIVE_CHECK_INTERVAL = 5
     
     while True:
-        current_video, id, mp3_path, video_elapsed, bitrate = get_current()
+        current_time = time.time()
+        if current_time - last_live_check >= LIVE_CHECK_INTERVAL:
+            live_info = check_for_live()
+            last_live_check = current_time
+        else:
+            live_info = None 
         
-        if not os.path.exists(mp3_path):
-            logger.warning(f"File not found: {mp3_path}")
-            time.sleep(0.5)
-            continue
-        
-        logger.info(f"Audio {id}: starting from {video_elapsed:.1f}s")
-        
-        cmd = [
-            'ffmpeg',
-            '-ss', str(video_elapsed),
-            '-i', mp3_path,
-            '-f', 'mp3',
-            '-b:a', '128k',           
-            '-ar', '44100',           
-            '-'
-        ]
-        
-        process = subprocess.Popen(
-            cmd,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.DEVNULL,
-            bufsize=8192
-        )
-        
-        try:
-            while True:
-                new_video, new_id, _, _, _ = get_current()
-                if new_id != id:
-                    logger.info(f"Switch: {id} -> {new_id}")
-                    process.terminate()
-                    break
-                
-                chunk = process.stdout.read(8192)
-                if not chunk:
-                    break
+        if live_info:
+            logger.info(f"Switching to live stream: {live_info.get('name')}")
+            
+            mpv_command = [
+                "mpv",
+                "--no-video",
+                "--no-terminal",
+                "--o=-",
+                "--of=mp3",
+                "--oac=libmp3lame",
+                "--oacopts=b=128k",
+                "http://monotonicradio.com:8000/stream.m3u"
+            ]
+            
+            process = subprocess.Popen(
+                mpv_command,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                bufsize=8192
+            )
+            
+            try:
+                chunk_count = 0
+                while True:
+                    # Check every ~25 chunks 
+                    chunk_count += 1
+                    if chunk_count % 25 == 0:
+                        if not check_for_live():
+                            logger.info("Live stream ended, switching back to playlist")
+                            process.terminate()
+                            break
                     
-                yield chunk
+                    chunk = process.stdout.read(8192)
+                    if not chunk:
+                        logger.warning("Live stream ended unexpectedly")
+                        break
+                    
+                    yield chunk
+                    
+            finally:
+                process.terminate()
+                process.wait()
                 
-        finally:
-            process.terminate()
-            process.wait()
-
+        else:
+            # Regular playlist streaming
+            current_video, id, mp3_path, video_elapsed, bitrate = get_current()
+            
+            if not os.path.exists(mp3_path):
+                logger.warning(f"File not found: {mp3_path}")
+                time.sleep(0.5)
+                continue
+            
+            logger.info(f"Audio {id}: starting from {video_elapsed:.1f}s")
+            
+            cmd = [
+                'ffmpeg',
+                '-ss', str(video_elapsed),
+                '-i', mp3_path,
+                '-f', 'mp3',
+                '-b:a', '128k',
+                '-ar', '44100',
+                '-'
+            ]
+            
+            process = subprocess.Popen(
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.DEVNULL,
+                bufsize=8192
+            )
+            
+            try:
+                chunk_count = 0
+                while True:
+                    # Check for live every ~25 chunks
+                    chunk_count += 1
+                    if chunk_count % 25 == 0:
+                        if check_for_live():
+                            logger.info("Live stream detected, switching")
+                            process.terminate()
+                            break
+                    
+                    # Check if we should switch to next video
+                    new_video, new_id, _, _, _ = get_current()
+                    if new_id != id:
+                        logger.info(f"Switch: {id} -> {new_id}")
+                        process.terminate()
+                        break
+                    
+                    chunk = process.stdout.read(8192)
+                    if not chunk:
+                        break
+                        
+                    yield chunk
+                    
+            finally:
+                process.terminate()
+                process.wait()
 
 def generate_live_stream(url):
     
