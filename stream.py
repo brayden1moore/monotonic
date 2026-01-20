@@ -300,7 +300,7 @@ def check_for_live():
         }
     
 
-@app.route('/test')
+@app.route('/stream')
 def stream_ffmpeg_mp3():
     return Response(
         generate_stream_ffmpeg(),
@@ -318,7 +318,7 @@ def stream_ffmpeg_mp3():
         direct_passthrough=True 
     )
 
-@app.route('/stream')
+@app.route('/stream-old')
 def stream_mp3():
     live_info = check_for_live()
     if live_info:
