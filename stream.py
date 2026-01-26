@@ -410,8 +410,8 @@ def stream_mp3():
 def get_thumbnail(id):
     thumbnail = archive_dict[id]['thumbnail']
     if 'assets/thumbnail' not in thumbnail:
-        if os.path.exists(f'assets/thumbnail/{id}.webp'):
-            thumbnail = f'assets/thumbnail/{id}.webp'
+        if os.path.exists(f'assets/thumbnails/{id}.webp'):
+            thumbnail = f'assets/thumbnails/{id}.webp'
         else:
             try:
                 response = requests.head(thumbnail, timeout=0.5)
