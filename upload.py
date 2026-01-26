@@ -3,6 +3,7 @@ import time
 import json
 import boto3
 import random
+import requests
 import tempfile
 import itertools
 import subprocess
@@ -63,6 +64,19 @@ def get_files_in_bucket():
     
     return files
 
+def download_thumbnail(archive):
+    if 'https://' in archive['thumbnail']:
+        filename = 'assets/thumbnails/' + archive['id'] + '.webp'
+        if not os.path.exists(filename):
+            resp = requests.get(archive['thumbnail'])
+            if resp.status_code == 200:
+                with open(filename, 'wb') as file:
+                    file.write(resp.content)
+                print(f"Image downloaded successfully as {filename}!")
+            else:
+                print(f"Failed to download image for {archive['id']}, {resp.status_code}")
+
+
 def get_mp3_bitrate_and_duration(filepath):
     cmd = [
         'ffprobe', '-v', 'quiet', '-print_format', 'json',
@@ -109,6 +123,7 @@ playlist = make_playlist(list(archive_dict.keys()), 5)
 def upload():
     files = get_files_in_bucket()
     for key, val in archive_dict.items():
+        download_thumbnail(val)
         if key not in files:
             upload_to_bucket(key)
 
