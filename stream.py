@@ -33,7 +33,7 @@ BEGINNING_TIME = datetime(year=2025, month=3, day=20, hour=6)
 
 def download_from_bucket(archive_id, max_retries=3):
     """Download MP3 file from CDN with retry logic"""
-    filepath = f'temp/{archive_id}.mp3'
+    filepath = f'archives/{archive_id}.mp3'
     if os.path.exists(filepath):
         logger.info(f"File {archive_id} already exists, skipping download")
         return True
