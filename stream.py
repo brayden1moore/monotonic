@@ -38,7 +38,7 @@ def download_from_bucket(archive_id, max_retries=3):
         logger.info(f"File {archive_id} already exists, skipping download")
         return True
 
-    url = f"https://scudbucket.sfo3.cdn.digitaloceanspaces.com/monotonic-radio/{archive_id}.mp3"
+    url = f"https://scudbucket.sfo3.cdn.digitaloceanspaces.com/monotonic-radio/{archive_id}"
     
     for attempt in range(max_retries):
         try:
