@@ -98,8 +98,8 @@ archive_dict = {}
 missing_files = []
 archives = []
 total_duration = 0
-archive_data = os.listdir('data')
 def refresh_archive_dict():
+    archive_data = os.listdir('data')
     global archive_dict, missing_files, archives, total_duration
     for archive_file in archive_data:
         if archive_file.endswith('.json'):
