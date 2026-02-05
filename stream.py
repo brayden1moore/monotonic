@@ -653,7 +653,8 @@ def upload():
         'duration': duration,
         'show': show,
         'thumbnail': thumb_path,
-        'filepath': mp3_path
+        'filepath': mp3_path,
+        'filename': mp3_filename
     }
     filename = f"{id}.json"
     with open(f'data/{filename}', 'w') as f:
