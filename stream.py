@@ -74,7 +74,7 @@ def download_from_bucket(archive_id, max_retries=3):
     return False
 
 
-def upload_to_bucket(file_path, id):    
+def upload_to_bucket(file_path, filename):    
     session = boto3.session.Session()
     client = session.client('s3',
                           region_name='sfo3',
@@ -82,7 +82,7 @@ def upload_to_bucket(file_path, id):
                           aws_access_key_id=config['AWS_ID'],
                           aws_secret_access_key=config['AWS_P'])
     
-    object_key = f'monotonic-radio/{id}.mp3'
+    object_key = f'monotonic-radio/{filename}'
     
     try:
         client.upload_file(file_path, 'scudbucket', object_key,
