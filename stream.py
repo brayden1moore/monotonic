@@ -68,7 +68,7 @@ for archive_file in archive_data:
         with open(f'data/{archive_file}', 'r') as f:
             data = json.load(f)
             archive_id = data['id']
-            logger.info(f"{{ARCHIVE_PATH}}/{data['filename']}")
+            logger.info(f"{ARCHIVE_PATH}/{data['filename']}")
             if os.path.exists(f"{{ARCHIVE_PATH}}/{data['filename']}"):
                 archive_dict[archive_id] = data
             else:
