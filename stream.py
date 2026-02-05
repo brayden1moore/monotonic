@@ -2,6 +2,7 @@ import os
 import time
 import json
 import boto3
+import string
 import random
 import requests
 import subprocess
@@ -93,32 +94,32 @@ def upload_to_bucket(file_path, filename):
         print(f"Error uploading: {e}")
         return False
 
-
 archive_dict = {}
 missing_files = []
+archives = []
+total_duration = 0
 archive_data = os.listdir('data')
-for archive_file in archive_data:
-    if archive_file.endswith('.json'):
-        with open(f'data/{archive_file}', 'r') as f:
-            data = json.load(f)
-            archive_id = data['id']
-            logger.info(f"{ARCHIVE_PATH}/{data['filename']}")
-            if os.path.exists(f"{ARCHIVE_PATH}/{data['filename']}"):
-                archive_dict[archive_id] = data
-            else:
-                download_from_bucket(data['filename'])
-logger.warning(f'MISSING {len(missing_files)} FILES')
-for i in missing_files:
-    logger.warning(f'   -{i}')
+def refresh_archive_dict():
+    global archive_dict, missing_files, archives, total_duration
+    for archive_file in archive_data:
+        if archive_file.endswith('.json'):
+            with open(f'data/{archive_file}', 'r') as f:
+                data = json.load(f)
+                archive_id = data['id']
+                logger.info(f"{ARCHIVE_PATH}/{data['filename']}")
+                if os.path.exists(f"{ARCHIVE_PATH}/{data['filename']}"):
+                    archive_dict[archive_id] = data
+                else:
+                    download_from_bucket(data['filename'])
+    logger.warning(f'MISSING {len(missing_files)} FILES')
+    for i in missing_files:
+        logger.warning(f'   -{i}')
 
-# Create sorted list of archive IDs for deterministic ordering
-archives = sorted(archive_dict.keys())
-
-# Calculate total duration
-total_duration = sum(v['duration'] for v in archive_dict.values())
+    archives = sorted(archive_dict.keys())
+    total_duration = sum(v['duration'] for v in archive_dict.values())
+refresh_archive_dict()
 
 # Make users
-
 users = {
     os.environ.get('ADMIN_PASS', 'test'): {
         'shows':['a','c','r'],
@@ -584,6 +585,15 @@ def login():
     
     return render_template('login.html')
 
+def get_user_episodes(user_shows):
+    user_episodes = []
+    for id, val in archive_dict.items():
+        if val['show'] in user_shows:
+            val['genre_string'] = ', '.join(val['genres'])
+            user_episodes.append(val)    
+    user_episodes = sorted(user_episodes, key=lambda d: d['title'])
+    return user_episodes
+
 @app.route('/upload', methods=['GET', 'POST'])
 def upload():
     """Admin upload page for new archives"""
@@ -591,13 +601,15 @@ def upload():
         return redirect('/login?page=upload')
     
     user_shows = flask_session.get('user_shows', [])
-    user_episodes = []
-    for id, val in archive_dict.items():
-        if val['show'] in user_shows:
-            user_episodes.append(val)    
+    user_episodes = get_user_episodes(user_shows)
 
+    episode_to_edit = request.args.get('episode')
     if request.method == 'GET':
-        return render_template('upload.html', shows=user_shows, episodes=user_episodes)
+        if episode_to_edit:
+            editing = archive_dict[episode_to_edit]
+            return render_template('upload.html', shows=user_shows, episodes=user_episodes, editing=editing)
+        else:
+            return render_template('upload.html', shows=user_shows, episodes=user_episodes)
     
     # Handle POST
     show = request.form.get('show')
@@ -606,6 +618,8 @@ def upload():
     genres = request.form.get('genres')
     mp3_file = request.files.get('mp3')
     thumbnail_file = request.files.get('thumbnail')
+
+    editing_id = request.form.get('id')
     
     # Validate user has permission for this show
     if show not in user_shows:
@@ -613,45 +627,55 @@ def upload():
     
     # Validate all fields
     if not all([show, title, tracklist, genres, mp3_file, thumbnail_file]):
-        return render_template('upload.html', shows=user_shows, error='All fields are required', episodes=user_episodes)
+        if not editing_id:
+            return render_template('upload.html', shows=user_shows, error='All fields are required', episodes=user_episodes)
     
     # Validate and save MP3
-    if not allowed_file(mp3_file.filename):
+    if not allowed_file(mp3_file.filename) and not editing_id:
         return render_template('upload.html', shows=user_shows, error='Invalid MP3 file', episodes=user_episodes)
     
-    mp3_filename = secure_filename(mp3_file.filename)
-    mp3_path = os.path.join(ARCHIVE_PATH, mp3_filename)
-    mp3_file.save(mp3_path)
-    upload_to_bucket(mp3_path, mp3_filename)
+    if mp3_file:
+        mp3_filename = secure_filename(mp3_file.filename)
+        mp3_path = os.path.join(ARCHIVE_PATH, mp3_filename)
+        mp3_file.save(mp3_path)
+        upload_to_bucket(mp3_path, mp3_filename)
+        
+        # Extract metadata
+        try:
+            bitrate, duration = get_mp3_metadata(mp3_path)
+        except Exception as e:
+            logger.error(f"Error extracting MP3 metadata: {e}")
+            return render_template('upload.html', shows=user_shows, error='Failed to read MP3 metadata', episodes=user_episodes)
+    else:
+        mp3_path = archive_dict[editing_id]['filepath']
+        mp3_filename = archive_dict[editing_id]['filename']
+        duration = archive_dict[editing_id]['duration']
+        bitrate = archive_dict[editing_id]['bitrate']
     
-    # Validate and save thumbnail
-    if not allowed_file(thumbnail_file.filename):
-        return render_template('upload.html', error='Invalid thumbnail file', episodes=user_episodes)
-    
-    thumb_filename = secure_filename(thumbnail_file.filename)
-    thumb_path = os.path.join('assets', 'thumbnails', thumb_filename)
-    thumbnail_file.save(thumb_path)
-    
-    # Extract metadata
-    try:
-        bitrate, duration = get_mp3_metadata(mp3_path)
-    except Exception as e:
-        logger.error(f"Error extracting MP3 metadata: {e}")
-        return render_template('upload.html', shows=user_shows, error='Failed to read MP3 metadata', episodes=user_episodes)
+    if thumbnail_file:
+        # Validate and save thumbnail
+        if not allowed_file(thumbnail_file.filename):
+            return render_template('upload.html', error='Invalid thumbnail file', episodes=user_episodes)
+        
+        thumb_filename = secure_filename(thumbnail_file.filename)
+        thumb_path = os.path.join('assets', 'thumbnails', thumb_filename)
+        thumbnail_file.save(thumb_path)
+    else:
+        thumb_path = archive_dict[editing_id]['thumbnail']
     
     # Process genres
     genres_list = [g.strip() for g in genres.split(',')]
     
     # Create archive entry
-    id = secure_filename(title)
+    id = editing_id or ''.join(random.choices(string.ascii_letters + string.digits, k=16))
     archive_data = {
         'id': id,
         'title': title,
         'genres': genres_list,
         'description': tracklist,
+        'show': show,
         'bitrate': bitrate,
         'duration': duration,
-        'show': show,
         'thumbnail': thumb_path,
         'filepath': mp3_path,
         'filename': mp3_filename
@@ -659,10 +683,17 @@ def upload():
     filename = f"{id}.json"
     with open(f'data/{filename}', 'w') as f:
         json.dump(archive_data, f)
+
+    refresh_archive_dict()
+    user_episodes = get_user_episodes(user_shows)
     
     logger.info(f"New upload: {title} ({duration}s, {bitrate} bps)")
     
-    return render_template('upload.html', shows=user_shows, success='Upload successful!', episodes=user_episodes)
+    if episode_to_edit:
+        editing = archive_dict[episode_to_edit]
+        return render_template('upload.html', shows=user_shows, episodes=user_episodes, editing=editing, success="Updated successfully!")
+    else:
+        return render_template('upload.html', shows=user_shows, episodes=user_episodes, success="Uploaded successfully!")
 
 # ============================================================================
 # STARTUP

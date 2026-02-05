@@ -20,7 +20,7 @@
 
 <body>
     <div id="content">
-        <div id="header">
+        <div id="header" onclick="location.href = '/upload'">
             <img id="logo" src="assets/mtr.jpg" height="50px" width="50px" style="margin-right:3px; margin-left: -5px;">
             Monotonic Archive
         </div>
@@ -29,32 +29,33 @@
             Show<br>
             <select id="show-select" name="show" required>
                 {% if 'a' in shows %}
-                <option value="a">Afternoon Breakfast</option>
+                <option {% if editing and editing.show == 'a' %}selected{% endif %} value="a">Afternoon Breakfast</option>
                 {% endif %}
                 {% if 'c' in shows %}
-                <option value="c">Cuts In The Fog</option>
+                <option {% if editing and editing.show == 'c' %}selected{% endif %} value="c">Cuts In The Fog</option>
                 {% endif %}
                 {% if 'r' in shows %}
-                <option value="r">Reading For Now</option>
+                <option {% if editing and editing.show == 'r' %}selected{% endif %} value="r">Reading For Now</option>
                 {% endif %}
             </select><br>
             
             Title<br>
-            <input id="title-input" name="title" placeholder="" required><br>
+            <input id="title-input" name="title" value="{% if editing %}{{ editing.title }}{% endif %}" required><br>
             
             Tracklist / Description<br>
-            <textarea id="tracklist-input" name="tracklist" placeholder="" required></textarea><br>
+            <textarea id="tracklist-input" name="tracklist" placeholder="" required>{% if editing %}{{ editing.description }}{% endif %}</textarea><br>
             
             Genres (comma-separated)<br>
-            <input id="genres-input" name="genres" placeholder="" required><br>
+            <input id="genres-input" name="genres" value="{% if editing %}{{ editing.genre_string }}{% endif %}" placeholder="" required><br>
             
-            MP3<br>
-            <input class="file-upload" type="file" name="mp3" accept=".mp3" required><br>
+            MP3{% if editing %} <a target="_blank" href="https://scudbucket.sfo3.cdn.digitaloceanspaces.com/monotonic-radio/{{ editing.filename }}">[{{ editing.filename }}]</a>{% endif %}<br>
+            <input class="file-upload" type="file" name="mp3" accept=".mp3" {% if not editing %}required{% endif %}><br>
             
-            Thumbnail<br>
-            <input class="file-upload" name="thumbnail" type="file" accept="image/*" required><br>
+            Thumbnail{% if editing %} <a target="_blank" href="{{ editing.thumbnail }}">[{{ editing.thumbnail }}]</a>{% endif %}<br>
+            <input class="file-upload" name="thumbnail" type="file" accept="image/*" {% if not editing %}required{% endif %}><br>
             
-            <button type="submit">Upload</button>
+            <input class="id" name="id" value="{% if editing %}{{ editing.id }}{% endif %}">
+            <button type="submit">{% if editing %}Update (you sure?){% else %}Upload{% endif %}</button>
         </form>
         
         <p class="message" id="success">{{ success }}</p>
@@ -64,7 +65,15 @@
         <div id="episodes">
             {% for episode in episodes %}
             <div class="episode">
-                <a href="upload?episode={{ episode.id }}">{{ episode.title }}</a>
+                <div class="episode-thumbnail-container">
+                    <img class="episode-thumbnail" src="{{ episode.thumbnail }}" onerror="this.onerror=null; this.src='assets/mtr.jpg';">
+                </div>
+                <div class="episode-info">
+                    <a class="episode-link" href="upload?episode={{ episode.id }}">{{ episode.title }}</a>
+                    <br>{{ episode.genre_string }}
+                    <br><a class="file-link" href="https://scudbucket.sfo3.cdn.digitaloceanspaces.com/monotonic-radio/{{ episode.filename }}" target="_blank">[MP3]</a>
+                </div>
+        
             </div> 
             {% endfor %} 
         </div>
@@ -73,9 +82,22 @@
 </body>
 
 <style>
+    .id {
+        display: none;
+    }
+    .episode-info {
+        display: block;
+    }
+    .episode-thumbnail-container {
+        height: 90px;
+        width: 90px;
+        margin-right: 10px;
+        border: 1px solid black;
+    }
     .episode-thumbnail {
-        height: 50px;
-        width: auto;
+        object-fit: cover;
+        height: 100%;
+        width: 100%;
     }
     #success {
         color: green;
@@ -91,6 +113,7 @@
         margin-bottom: 20px;
     }
     #header {
+        cursor: pointer;
         display: flex;
         align-items: center;
         margin-bottom: 20px;
@@ -112,6 +135,9 @@
         text-align: start;
         cursor: pointer;
     }
+    a {
+        color: rgb(74, 128, 255);
+    }
     button {
         border: 1px solid black;
         outline: none;
@@ -119,7 +145,7 @@
         cursor: pointer;
         color: white;
         font-family: 'Archivo Regular';
-        width: 70px;
+        width: auto;
         height: 30px;
         border-radius: 8px;
     }
@@ -146,24 +172,36 @@
         width: 50%;
     }
     #upload-form {
+        margin-top: 35px;
         align-items: center;
         height: auto;
         display: block;
     }
 
     #episodes {
-        padding-top: 10px;
+        padding-top: 0px;
         border-top: 1px solid black;
         width: 100%;
         height: fit-content;
-        max-height: 100px;
+        /*max-height: 250px;*/
         overflow-y: scroll;
     }
 
     .episode {
-        cursor:pointer;
-        margin-bottom: 5px;
-        font-size: 10pt;
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        padding-left: 0px;
+        margin-bottom: 0px;
+        border-bottom: 1px solid lightgray;
+    }
+
+    .episode-link {
+        color: rgb(74, 128, 255);
+    }
+
+    .file-link {
+        color: black;
     }
 
     @font-face {
@@ -186,6 +224,5 @@
 </style>
 
 <script>
-const episodesList ={{ episodes|tojson|safe }};
-console.log(episodesList);
+
 </script>
