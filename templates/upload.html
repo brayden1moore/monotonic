@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="icon" type="image/png" href="/favicon/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png" />
+    <link rel="manifest" href="/favicon/site.webmanifest"/>
+    <meta name="viewport" content="width=device-width, initial-scale=0.85">
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="/assets/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
+    <link rel="shortcut icon" href="/assets/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="Monotonic Admin" />
+    <link rel="manifest" href="/assets/site.webmanifest" />
+
+    <script src="https://kit.fontawesome.com/235894b977.js" crossorigin="anonymous"></script>    <title>Upload - Monotonic Radio</title>
+</head> 
+
+<body>
+    <div id="content">
+        <div id="header">
+            <img id="logo" src="assets/mtr.jpg" height="50px" width="50px" style="margin-right:3px; margin-left: -5px;">
+            Monotonic Archive
+        </div>
+        
+        <form id="upload-form" method="POST" enctype="multipart/form-data">
+            Show<br>
+            <select id="show-select" name="show" required>
+                {% if 'a' in shows %}
+                <option value="a">Afternoon Breakfast</option>
+                {% endif %}
+                {% if 'c' in shows %}
+                <option value="c">Cuts In The Fog</option>
+                {% endif %}
+                {% if 'r' in shows %}
+                <option value="r">Reading For Now</option>
+                {% endif %}
+            </select><br>
+            
+            Title<br>
+            <input id="title-input" name="title" placeholder="" required><br>
+            
+            Tracklist / Description<br>
+            <textarea id="tracklist-input" name="tracklist" placeholder="" required></textarea><br>
+            
+            Genres (comma-separated)<br>
+            <input id="genres-input" name="genres" placeholder="" required><br>
+            
+            MP3<br>
+            <input class="file-upload" type="file" name="mp3" accept=".mp3" required><br>
+            
+            Thumbnail<br>
+            <input class="file-upload" name="thumbnail" type="file" accept="image/*" required><br>
+            
+            <button type="submit">Upload</button>
+        </form>
+        
+        <p class="message" id="success">{{ success }}</p>
+        <p class="message" id="error">{{ error }}</p>
+
+        Episodes
+        <div id="episodes">
+            {% for episode in episodes %}
+            <div class="episode">
+                <a href="upload?episode={{ episode.id }}">{{ episode.title }}</a>
+            </div> 
+            {% endfor %} 
+        </div>
+
+    </div>
+</body>
+
+<style>
+    .episode-thumbnail {
+        height: 50px;
+        width: auto;
+    }
+    #success {
+        color: green;
+    }
+    #error {
+        color: red;
+    }
+    .message {
+        height: fit-content;
+    }
+
+    #show-select {
+        margin-bottom: 20px;
+    }
+    #header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+        font-size: 40px;
+        letter-spacing: -0.06em;
+        font-family: 'Archivo SemiBold';
+        border-bottom: 1px solid black;
+        padding-bottom: 15px;
+    }
+    textarea {
+        resize:vertical;
+        width: 100%;
+        height: 100px;
+        margin-bottom: 20px;
+    }
+    input[type="file"] {
+        align-items: baseline;
+        color: inherit;
+        text-align: start;
+        cursor: pointer;
+    }
+    button {
+        border: 1px solid black;
+        outline: none;
+        background-color: rgb(74, 128, 255);
+        cursor: pointer;
+        color: white;
+        font-family: 'Archivo Regular';
+        width: 70px;
+        height: 30px;
+        border-radius: 8px;
+    }
+    button:hover{
+        background-color: white;
+        color: black;
+    }
+    input {
+        margin-bottom: 20px;
+        width: 100%;
+    }
+
+    body {
+        padding-top: 20px;
+        letter-spacing: -0.06em;
+        font-family: 'Archivo Regular';
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 90vh;
+    }
+    #content {
+        height: auto;
+        width: 50%;
+    }
+    #upload-form {
+        align-items: center;
+        height: auto;
+        display: block;
+    }
+
+    #episodes {
+        padding-top: 10px;
+        border-top: 1px solid black;
+        width: 100%;
+        height: fit-content;
+        max-height: 100px;
+        overflow-y: scroll;
+    }
+
+    .episode {
+        cursor:pointer;
+        margin-bottom: 5px;
+        font-size: 10pt;
+    }
+
+    @font-face {
+      font-family: "Archivo SemiBold";
+      src: url("assets/Archivo-SemiBold.ttf") format("truetype");
+    }
+    @font-face {
+        font-family: "Archivo Regular";
+        src: url("assets/Archivo-Regular.ttf") format("truetype");
+    }
+
+    @media (orientation: portrait)  {
+        #content {
+            width: 90%;
+        }
+        #header {
+            font-size: 38px;
+        }
+    }
+</style>
+
+<script>
+const episodesList ={{ episodes|tojson|safe }};
+console.log(episodesList);
+</script>

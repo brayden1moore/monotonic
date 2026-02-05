@@ -128,11 +128,14 @@
     </div>
 
   </div>
+  <div id="archives">
+  </div>
+
   <div id="residents">
     <div class="resident">
       <img class="resident-photo" src="assets/residents/Afternoon.png">
       <div class="resident-text">
-        Afternoon Breakfast features easy listening music for whenever you want to wake up.<br><br>Sundays @ 12PM Eastern.
+        Afternoon Breakfast features easy listening music for whenever you want to wake up.<br><br>Sundays @ 11AM Eastern.
       </div>
   </div>
     <div class="resident">
@@ -363,7 +366,7 @@
     background-color: rgb(74, 128, 255);
     padding-top: 25px;
     display: block;
-    margin-top: 131px;
+    margin-top: 129px;
     line-height: 1.35em;
     padding-bottom: 30px;
     margin-bottom: -120px;
@@ -414,7 +417,7 @@
   #play {
     z-index: 11;
     position: fixed;
-    top: 72px;
+    top: 62px;
     overflow: hidden !important;
     /*background-color: rgba(74, 128, 255,1);*/
     background-color: white;
@@ -444,7 +447,7 @@
 
   #video {
     width: 95%;
-    aspect-ratio: 16 /9;
+    aspect-ratio: 16 / 8;
     display: flex;
     justify-content: center;
     position: relative;
@@ -553,6 +556,9 @@
           margin-bottom: 0px;
         }
 
+        #play {
+          top: 72px;
+        }
       #logo {
         height: 65px !important;
         width: 65px !important;
@@ -588,7 +594,7 @@
        }
 
        #video {
-        width: 80%;
+        width: 74.75%;
        }
       #info-table {
         width:600px;
@@ -618,7 +624,6 @@
         display: flex;
         width: 100%;
         margin-bottom: 0px;
-  }
       }
       #chat {
         width: 300px;
@@ -757,7 +762,7 @@ function getUpdatedInfo() {
                 if (streamEmbed.src != url) {
                   streamEmbed.style.display = 'block';
                   streamEmbed.src = url;
-                  audio.src = audio.src;
+                  //audio.src = audio.src;
                   //chat.src = "https://monotonicradio1.chatango.com/";
                 }
               }

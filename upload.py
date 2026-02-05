@@ -105,7 +105,7 @@ def make_playlist(archives, iterations):
         for j in archives:
             
             shuffled_archives = archives.copy()
-            random.Random(iterations).shuffle(shuffled_archives)
+            random.Random(i).shuffle(shuffled_archives)
             
             if len(playlist) > 0:
                 attempt = 0
