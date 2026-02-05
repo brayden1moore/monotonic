@@ -111,6 +111,7 @@ def refresh_archive_dict():
                     archive_dict[archive_id] = data
                 else:
                     download_from_bucket(data['filename'])
+                    archive_dict[archive_id] = data
     logger.warning(f'MISSING {len(missing_files)} FILES')
     for i in missing_files:
         logger.warning(f'   -{i}')
