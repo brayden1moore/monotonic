@@ -24,6 +24,9 @@ app.secret_key = os.environ.get('SECRET_KEY', 'orange-trench')
 app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024  # 100MB
 CORS(app)
 
+ARCHIVE_PATH = '/var/lib/mtr/archives'
+os.makedirs(ARCHIVE_PATH, exist_ok=True)
+
 ALLOWED_EXTENSIONS = {'mp3', 'png', 'jpg', 'jpeg', 'gif', 'webp'}
 LIVE_STREAM_URL = "http://monotonicradio.com:8000/stream.m3u"
 LIVE_STATUS_URL = "http://monotonicradio.com:8000/status-json.xsl"
@@ -33,7 +36,7 @@ BEGINNING_TIME = datetime(year=2025, month=3, day=20, hour=6)
 
 def download_from_bucket(archive_id, max_retries=3):
     """Download MP3 file from CDN with retry logic"""
-    filepath = f'archives/{archive_id}'
+    filepath = f'{ARCHIVE_PATH}/{archive_id}'
     if os.path.exists(filepath):
         logger.info(f"File {archive_id} already exists, skipping download")
         return True
@@ -65,7 +68,7 @@ for archive_file in archive_data:
         with open(f'data/{archive_file}', 'r') as f:
             data = json.load(f)
             archive_id = data['id']
-            if os.path.exists(data['filepath']):
+            if os.path.exists(f"{{ARCHIVE_PATH}}/{data['filename']}"):
                 archive_dict[archive_id] = data
             else:
                 download_from_bucket(data['filename'])
@@ -234,7 +237,7 @@ def get_current():
             # Found the current track
             archive_elapsed = time_into_iteration - time_sum
             byterate = v['bitrate'] / 8
-            mp3_path = v['filepath']
+            mp3_path = ARCHIVE_PATH + '/' + v['filepath']
             
             return v['title'], archive_id, mp3_path, archive_elapsed, byterate
         
