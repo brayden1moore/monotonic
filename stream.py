@@ -1,6 +1,7 @@
 import os
 import time
 import json
+import boto3
 import random
 import requests
 import subprocess
@@ -24,13 +25,25 @@ app.secret_key = os.environ.get('SECRET_KEY', 'orange-trench')
 app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024  # 100MB
 CORS(app)
 
-ARCHIVE_PATH = '/var/lib/mtr/archives'
-os.makedirs(ARCHIVE_PATH, exist_ok=True)
+try:
+    ARCHIVE_PATH = '/var/lib/mtr/archives'
+    os.makedirs(ARCHIVE_PATH, exist_ok=True)
+except:
+    ARCHIVE_PATH = 'archives'
 
 ALLOWED_EXTENSIONS = {'mp3', 'png', 'jpg', 'jpeg', 'gif', 'webp'}
 LIVE_STREAM_URL = "http://monotonicradio.com:8000/stream.m3u"
 LIVE_STATUS_URL = "http://monotonicradio.com:8000/status-json.xsl"
 BEGINNING_TIME = datetime(year=2025, month=3, day=20, hour=6)
+
+try: 
+    with open('config.json', 'r') as f:
+        config = json.load(f)
+except:
+    config = {
+        'AWS_ID':os.environ['AWS_ID'],
+        'AWS_P':os.environ['AWS_P']
+    }
 
 # Load archives data from individual JSON files
 
@@ -59,6 +72,27 @@ def download_from_bucket(archive_id, max_retries=3):
                 time.sleep(2 ** attempt)
     
     return False
+
+
+def upload_to_bucket(file_path, id):    
+    session = boto3.session.Session()
+    client = session.client('s3',
+                          region_name='sfo3',
+                          endpoint_url='https://sfo3.digitaloceanspaces.com',
+                          aws_access_key_id=config['AWS_ID'],
+                          aws_secret_access_key=config['AWS_P'])
+    
+    object_key = f'monotonic-radio/{id}.mp3'
+    
+    try:
+        client.upload_file(file_path, 'scudbucket', object_key,
+                          ExtraArgs={'StorageClass': 'STANDARD','ACL':'public-read'})
+        print(f"Successfully uploaded {object_key}")
+        return True
+    except Exception as e:
+        print(f"Error uploading: {e}")
+        return False
+
 
 archive_dict = {}
 missing_files = []
@@ -588,6 +622,7 @@ def upload():
     mp3_filename = secure_filename(mp3_file.filename)
     mp3_path = os.path.join(ARCHIVE_PATH, mp3_filename)
     mp3_file.save(mp3_path)
+    upload_to_bucket(mp3_path, mp3_filename)
     
     # Validate and save thumbnail
     if not allowed_file(thumbnail_file.filename):
