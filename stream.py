@@ -30,6 +30,33 @@ LIVE_STATUS_URL = "http://monotonicradio.com:8000/status-json.xsl"
 BEGINNING_TIME = datetime(year=2025, month=3, day=20, hour=6)
 
 # Load archives data from individual JSON files
+
+def download_from_bucket(archive_id, max_retries=3):
+    """Download MP3 file from CDN with retry logic"""
+    filepath = f'temp/{archive_id}.mp3'
+    if os.path.exists(filepath):
+        logger.info(f"File {archive_id} already exists, skipping download")
+        return True
+
+    url = f"https://scudbucket.sfo3.cdn.digitaloceanspaces.com/monotonic-radio/{archive_id}.mp3"
+    
+    for attempt in range(max_retries):
+        try:
+            response = requests.get(url, timeout=30)
+            response.raise_for_status()
+            
+            with open(filepath, 'wb') as f:
+                f.write(response.content)
+            logger.info(f"Successfully downloaded {archive_id}")
+            return True
+            
+        except requests.RequestException as e:
+            logger.error(f"Attempt {attempt + 1} failed to download {archive_id}: {e}")
+            if attempt < max_retries - 1:
+                time.sleep(2 ** attempt)
+    
+    return False
+
 archive_dict = {}
 missing_files = []
 archive_data = os.listdir('data')
@@ -41,7 +68,7 @@ for archive_file in archive_data:
             if os.path.exists(data['filepath']):
                 archive_dict[archive_id] = data
             else:
-                missing_files.append(archive_id)
+                download_from_bucket(data['filename'])
 logger.warning(f'MISSING {len(missing_files)} FILES')
 for i in missing_files:
     logger.warning(f'   -{i}')
@@ -87,33 +114,6 @@ def cleanup_process(process):
             process.wait()
     except Exception as e:
         logger.error(f"Error cleaning up process: {e}")
-
-
-def download_from_bucket(archive_id, max_retries=3):
-    """Download MP3 file from CDN with retry logic"""
-    filepath = f'temp/{archive_id}.mp3'
-    if os.path.exists(filepath):
-        logger.info(f"File {archive_id} already exists, skipping download")
-        return True
-
-    url = f"https://scudbucket.sfo3.cdn.digitaloceanspaces.com/monotonic-radio/{archive_id}.mp3"
-    
-    for attempt in range(max_retries):
-        try:
-            response = requests.get(url, timeout=30)
-            response.raise_for_status()
-            
-            with open(filepath, 'wb') as f:
-                f.write(response.content)
-            logger.info(f"Successfully downloaded {archive_id}")
-            return True
-            
-        except requests.RequestException as e:
-            logger.error(f"Attempt {attempt + 1} failed to download {archive_id}: {e}")
-            if attempt < max_retries - 1:
-                time.sleep(2 ** attempt)
-    
-    return False
 
 
 def get_thumbnail(archive_id):
