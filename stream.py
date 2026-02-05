@@ -238,7 +238,7 @@ def get_current():
             # Found the current track
             archive_elapsed = time_into_iteration - time_sum
             byterate = v['bitrate'] / 8
-            mp3_path = ARCHIVE_PATH + '/' + v['filepath']
+            mp3_path = ARCHIVE_PATH + '/' + v['filename']
             
             return v['title'], archive_id, mp3_path, archive_elapsed, byterate
         
@@ -586,7 +586,7 @@ def upload():
         return render_template('upload.html', shows=user_shows, error='Invalid MP3 file', episodes=user_episodes)
     
     mp3_filename = secure_filename(mp3_file.filename)
-    mp3_path = os.path.join('archives', mp3_filename)
+    mp3_path = os.path.join(ARCHIVE_PATH, mp3_filename)
     mp3_file.save(mp3_path)
     
     # Validate and save thumbnail
