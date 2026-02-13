@@ -417,44 +417,50 @@ class StreamBroadcaster:
         CHUNKS_BETWEEN_CHECKS = 25
         LIVE_CHECK_INTERVAL = 3
         
-        last_live_check = 0
-        
         while self.running:
-            with self.lock:
-                if not self.clients:
-                    time.sleep(0.1)
-                    continue
+            while self.running:
+                with self.lock:
+                    if self.clients:
+                        break
+                time.sleep(0.1)
+            
+            if not self.running:
+                break
             
             try:
-                current_time = time.time()
+                last_live_check = time.time()
                 
-                # Check for live stream periodically
-                if current_time - last_live_check >= LIVE_CHECK_INTERVAL:
-                    live_info = check_for_live()
-                    last_live_check = current_time
-                else:
-                    live_info = None
-                
-                # Generate appropriate stream
-                if live_info:
-                    stream_generator = stream_live(live_info, CHUNK_SIZE, CHUNKS_BETWEEN_CHECKS)
-                else:
-                    stream_generator = stream_playlist(CHUNK_SIZE, CHUNKS_BETWEEN_CHECKS)
-                
-                # Broadcast chunks to all clients
-                for chunk in stream_generator:
-                    with self.lock:
-                        dead_clients = []
-                        for client_id, client_queue in self.clients.items():
-                            try:
-                                client_queue.put_nowait(chunk)
-                            except queue.Full:
-                                logger.warning(f"Client {client_id} queue full, disconnecting")
-                                dead_clients.append(client_id)
-                        
-                        for client_id in dead_clients:
-                            del self.clients[client_id]
-            
+                while self.running:
+                    current_time = time.time()
+                    
+                    if current_time - last_live_check >= LIVE_CHECK_INTERVAL:
+                        live_info = check_for_live()
+                        last_live_check = current_time
+                    else:
+                        live_info = None
+                    
+                    # Generate appropriate stream
+                    if live_info:
+                        stream_generator = stream_live(live_info, CHUNK_SIZE, CHUNKS_BETWEEN_CHECKS)
+                    else:
+                        stream_generator = stream_playlist(CHUNK_SIZE, CHUNKS_BETWEEN_CHECKS)
+                    
+                    for chunk in stream_generator:
+                        with self.lock:
+                            if not self.clients:
+                                break
+                            
+                            dead_clients = []
+                            for client_id, client_queue in self.clients.items():
+                                try:
+                                    client_queue.put_nowait(chunk)
+                                except queue.Full:
+                                    logger.warning(f"Client {client_id} queue full, disconnecting")
+                                    dead_clients.append(client_id)
+                            
+                            for client_id in dead_clients:
+                                del self.clients[client_id]
+                                
             except Exception as e:
                 logger.error(f"Broadcast error: {e}", exc_info=True)
                 time.sleep(1)
