@@ -672,4 +672,4 @@ def upload():
 get_current()
 
 if __name__ == '__main__':
-    app.run(debug=True, port=8888, threaded=True)
+    app.run(debug=False, port=8888, threaded=True)
