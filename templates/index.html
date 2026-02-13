@@ -818,48 +818,37 @@ setInterval(getUpdatedInfo, 3000);
 function setupMarquee(wrapperId, direction = 'left') {
   const wrapper = document.getElementById(wrapperId);
   if (!wrapper) return;
-
+  
+  const orgs = wrapper.querySelector('.marquee-content') || wrapper;
   const originalItems = [...orgs.children];
   
+  // Clone items 
   const clones = originalItems.map(item => item.cloneNode(true));
+  clones.forEach(clone => orgs.appendChild(clone));
   
-  if (direction === 'left') {
-    clones.forEach(clone => orgs.appendChild(clone));
-  } else {
-    clones.reverse().forEach(clone => orgs.insertBefore(clone, orgs.firstChild));
-  }
-
-  orgs.offsetHeight;
-  
+  // Calculate total width of original items (half the content)
   const totalWidth = originalItems.reduce((sum, el) => {
     const style = window.getComputedStyle(el);
     const marginRight = parseFloat(style.marginRight) || 0;
     return sum + el.offsetWidth + marginRight;
   }, 0);
   
-  const duration = totalWidth / 50; // 75px/sec
-  
+  const duration = totalWidth / 50; // 50px/sec
   const uid = Math.random().toString(36).substr(2, 5);
   const animName = `scroll-${direction}-${uid}`;
-  
-  if (direction === 'left') {
-    orgs.style.transform = 'translateX(0)';
-  } else {
-    orgs.style.transform = 'translateX(-50%)';
-  }
   
   const style = document.createElement('style');
   if (direction === 'left') {
     style.textContent = `
       @keyframes ${animName} {
         0% { transform: translateX(0); }
-        100% { transform: translateX(-50%); }
+        100% { transform: translateX(-${totalWidth}px); }
       }
     `;
   } else {
     style.textContent = `
       @keyframes ${animName} {
-        0% { transform: translateX(-50%); }
+        0% { transform: translateX(-${totalWidth}px); }
         100% { transform: translateX(0); }
       }
     `;
@@ -867,11 +856,8 @@ function setupMarquee(wrapperId, direction = 'left') {
   document.head.appendChild(style);
   
   orgs.style.cssText += `
-    animation-name: ${animName};
-    animation-duration: ${duration}s;
-    animation-timing-function: linear;
-    animation-iteration-count: infinite;
-    animation-fill-mode: forwards;
+    display: flex;
+    animation: ${animName} ${duration}s linear infinite;
   `;
 }
 
