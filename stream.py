@@ -359,12 +359,13 @@ def stream_playlist(chunk_size, chunks_between_checks):
     process = subprocess.Popen(
         cmd,
         stdout=subprocess.PIPE,
-        stderr=subprocess.DEVNULL,
+        stderr=subprocess.PIPE,  # Changed from DEVNULL to capture errors
         bufsize=chunk_size
     )
     
     try:
         chunk_count = 0
+        bytes_read = 0
         while True:
             chunk_count += 1
             
@@ -384,9 +385,14 @@ def stream_playlist(chunk_size, chunks_between_checks):
             
             chunk = process.stdout.read(chunk_size)
             if not chunk:
-                logger.info(f"End of track {track_id}")
+                # Log WHY it ended
+                stderr_output = process.stderr.read().decode('utf-8', errors='ignore')
+                logger.info(f"End of track {track_id} - read {bytes_read} bytes")
+                if stderr_output:
+                    logger.error(f"FFmpeg stderr: {stderr_output[-500:]}")  # Last 500 chars
                 break
             
+            bytes_read += len(chunk)
             yield chunk
     finally:
         cleanup_process(process)
