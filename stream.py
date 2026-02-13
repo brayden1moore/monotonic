@@ -541,7 +541,7 @@ def get_info():
         'byterate': byterate,
         'thumbnail': get_thumbnail(archive_id),
         'id':archive_id,
-        'download':f'https://scudbucket.sfo3.cdn.digitaloceanspaces.com/monotonic-radio/{mp3_path.split('/')[-1]}.mp3',
+        'download':f'https://scudbucket.sfo3.cdn.digitaloceanspaces.com/monotonic-radio/{mp3_path.split('/')[-1]}',
         'source': 'archive'
     }
 
