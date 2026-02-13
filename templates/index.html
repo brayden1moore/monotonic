@@ -14,14 +14,17 @@
     <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png" />
     <meta name="apple-mobile-web-app-title" content="Monotonic" />
     <link rel="manifest" href="/assets/site.webmanifest" />
-
     <script src="https://kit.fontawesome.com/235894b977.js" crossorigin="anonymous"></script>    <title>Monotonic Radio</title>
 </head> 
 
 <body>
   <div id="content">
 
-        <div id="header"><img id="logo" src="assets/mtr.jpg" height="45px" width="45px" style="margin-right:3px; margin-left: -5px;">Monotonic Radio &nbsp;<br id="line-break"><span id="live-status-offline">[<img src="assets/hourglass.png" class="live-icon"></img>OFFLINE ]</span><span id="live-status-online">[<img src="assets/play.png" class="live-icon"></img>ONLINE ]</span></div>
+    <div id="header">
+      <img id="logo" src="assets/mtr.jpg" height="45px" width="45px" style="margin-right:3px; margin-left: -5px;">Monotonic Radio
+    </div>
+
+    <div id="archives-link" href="#archives" onclick="goToArchive()">Archives</div>
 
     <div id="play">
       <div class="colors" style="display: none;">
@@ -53,8 +56,6 @@
     </div>
     
     <div id="pemdas">
-    <i></i>
-
     <div id="stream-and-chat">
       <div id="video">
         <img id="no-video" src="assets/novideo.png" style="display: none;" onclick="toggle()">
@@ -120,7 +121,7 @@
     
   </div>
 
-        <div id="info-div" >
+  <div id="info-div" >
         <div id="info-table">
           <div id="title-info" >
               {{ now_playing }}
@@ -136,7 +137,52 @@
     </div>
 
   </div>
+ 
+  </div>
+
   <div id="archives">
+    <div id="archive-header" >Archives</div>
+          {% set ns = namespace(page=1, count=0, page_size=8) %}
+          {% for episode in episodes %}
+          {% if ns.count >= ns.page_size %}
+              {% set ns.page = ns.page + 1 %}
+              {% set ns.count = 0 %}
+              {% set ns.page_size = 9 %}
+          {% endif %} 
+            <div class="episode" data-page="{{ ns.page }}" >
+                <div class="episode-thumbnail-container" onclick="toggleEpisode('{{ episode.id }}')">
+                    <img class="episode-thumbnail" src="{{ episode.thumbnail }}" onerror="this.onerror=null; this.src='assets/mtr.jpg';">
+                </div>
+                <div class="episode-info">
+                    <div class="episode-title">{{ episode.title }}</div>
+                    <div class="episode-genres red">{{ episode.genre_string }}</div>
+                    <div class="episode-player">
+                          <div class="episode-play-button" id="play-{{ episode.id }}" onclick="toggleEpisode('{{ episode.id }}')">
+                              <svg class="episode-play-icon" viewBox="0 0 100 100" width="35px" height="60%">
+                                  <polygon class="episode-triangle" points="1,20 1,80 46,50" fill="black" ></polygon>
+                              </svg>
+                              <svg class="episode-pause-icon" viewBox="0 0 100 100" width="35px" height="60%">
+                                  <rect x="1" y="20" width="18" height="60" fill="black" ></rect>
+                                  <rect x="30" y="20" width="18" height="60" fill="black"></rect>
+                              </svg>
+                          </div>
+                      <div class="episode-seeker">
+                        <div class="episode-seeker-progress"></div>
+                      </div>
+                          <audio id= {{ episode.id }} data-src= {{ episode.download }}></audio>
+                    </div>
+                </div>
+            </div> 
+            {% set ns.count = ns.count + 1 %}
+          {% endfor %} 
+  </div>
+
+  <div id="archive-paginator-div">
+    <div id="archive-paginator">
+      {% for i in range(pages) %}
+          <div class="page" data-page="{{ i + 1}}">{{ i+1 }}</div>
+      {% endfor %} 
+    </div>
   </div>
 
   <div id="residents">
@@ -171,6 +217,184 @@
 </body>
 
 <style>
+
+  .episode-player {
+    margin-top: 5px;
+    display: flex;
+    align-items: center;
+  }
+
+  .episode-seeker {
+    cursor: pointer;
+      margin-left: -10px;
+      width: 100%;
+      height: 3px;
+      background: rgb(0, 0, 0);
+      cursor: poinrgb(0, 0, 0);
+      position: relative;
+      margin-top: 0px;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  .episode-play-button {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+  }
+
+  .episode-seeker-progress {
+      height: 100%;
+      background: rgb(74, 128, 255);
+      width: 0%;
+      pointer-events: none;
+  }
+
+  .active-page {
+    background-color: rgb(74, 128, 255);
+    border-bottom: 1px solid black;
+
+  }
+
+  .page {
+    height: 20px;
+    cursor: pointer;
+    padding-left: 8px;
+    padding-right: 8px;
+    display: flex;
+    align-items: center;
+  }
+
+  .page:hover {
+    background-color: rgb(240, 91, 24);
+    border-bottom: 1px solid black;
+  }
+
+  #archive-paginator-div {
+    margin-bottom: 30px;
+    margin-top: 10px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #archive-paginator {
+    display: flex;
+  }
+  .episode-genres {
+    color: black;
+    width: fit-content;
+  }
+
+  .episode-title {
+    font-family: 'Archivo SemiBold';
+    font-size: 14pt;
+    margin-bottom: 4px;
+  }
+
+  #archive-header {
+    padding: 20px;
+    color: rgb(255, 255, 255);
+    border: 1px solid black;
+    background-color: rgb(0, 0, 0);
+  }
+
+  .episode {
+    max-height: 150px;
+    cursor: default;
+    align-items: center;
+    font-family: 'Archivo Regular';
+    font-size: 12pt;
+    display: flex;
+    border: 1px solid black;
+    transition: 0.1s;
+  }
+
+  .episode:hover {
+    color: white;
+    background-color:black;
+  }
+
+
+  .episode:hover .episode-seeker{
+    background-color:rgb(255, 255, 255);
+  }
+
+  .episode-pause-icon {
+    fill: black !important;
+    display: none;
+  }
+
+  .episode:hover polygon, .episode:hover rect{
+    fill: white ;
+  }
+
+  .episode-pause-icon rect {
+    fill: black;
+  }
+
+  polygon:hover {
+    fill:rgb(74, 128, 255) !important;
+  }
+
+    .episode-info {
+      width: 100%;
+        display: block;
+        padding: 20px;
+        height: fit-content;
+    }
+    .episode-thumbnail-container {
+      cursor: pointer;
+        height: 150px;
+        width: 150px;
+        margin-right: 10px;
+        border-right: 1px solid black;
+        aspect-ratio: 1 / 1;
+    }
+    .episode-thumbnail {
+        object-fit: cover;
+        height: 100%;
+        width: 100%;
+        aspect-ratio: 1 / 1;
+        transition: 0.1s;
+    }
+
+  #archives {
+    font-family: 'Archivo Semibold';
+    font-size: 28px;
+    padding: 23px;
+    padding-top: 43px;
+    display: grid;
+    gap: 20px;
+    grid-template-columns: 1fr;
+    border-top: 1px solid black;
+  }
+
+  #archives-link {
+    background-color: black;
+    border-left: black 1px solid;
+    border-right: black 1px solid;
+    cursor: pointer;
+    z-index: 100;
+    top: 62.8px;
+    left: calc(100% - 100px);
+    width: 100px;
+    height: 45px;
+    position: fixed;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: white;
+  }
+
+  #archives-link:hover {
+    background-color: white;
+    color: black;
+  }
 
   #residents {
     border-bottom: black 1px solid;
@@ -207,28 +431,28 @@
   }
   #genre-info {
     text-align: left;
-    padding: 10px;
+    padding: 10px 23px;
     border-bottom: 1px solid black;
   }
   #description-info {
-    padding: 10px;
+    padding: 10px 23px;
     border-top: none;
     text-align: left;
   }
   #info-table {
     background-color: white;
     width: 100%;
-    margin-bottom: 150px;
+    margin-bottom: 115px;
   }
   #title-info {
     text-align: left;
     font-family: 'Archivo Semibold';
-    font-size:18pt;
+    font-size:28px;
     height: 30px;
     justify-content: left;
     align-items: center;
     display: flex;
-    padding: 10px;
+    padding: 10px 23px;
     border-bottom: 1px solid black;
   }
   #info-div {
@@ -267,7 +491,7 @@
   }
 
   .red {
-    background-color: rgba(240, 91, 24);
+    background-color: rgb(240, 91, 24);
   }
 
   .blue {
@@ -548,6 +772,7 @@
     font-family: "Archivo Semibold";
     font-size: 24pt;
     line-height: 0.5em;
+    letter-spacing: -0.05em;
   }
   @font-face {
       font-family: "Archivo SemiBold";
@@ -557,7 +782,19 @@
       font-family: "Archivo Regular";
       src: url("assets/Archivo-Regular.ttf") format("truetype");
   }
+
+  @media (min-aspect-ratio: 8/10) {
+      #archives {
+          grid-template-columns: 1fr 1fr;
+      }
+  }
+
      @media (orientation: landscape)  {
+
+        #archives {
+            grid-template-columns: 1fr 1fr 1fr;
+        }
+
         #pemdas {
           display: flex;
           margin-bottom: 0px;
@@ -575,6 +812,10 @@
           padding: 5px 18px 5px;
         }
 
+          #archives-link {
+            top: 72.8px;
+            left: calc(100% - 125px);
+          }
 
 
        #video iframe {
@@ -610,7 +851,7 @@
       #info-div {
         margin-left: -80px;
         position: relative;
-        left: 120px;
+        left: 135px;
         margin-top: 30px;
       }
 
@@ -673,8 +914,8 @@ const blueCircleMobile = document.getElementById('blue-circle-mobile');
 const streamEmbed = document.getElementById('stream');
 const orgs = document.querySelector('.colors');
 
-function toggle() {
-  if (!audio.paused) {
+function toggle(forcePause=false) {
+  if (!audio.paused | forcePause==true) {
     audio.pause();
     playIcon.style.display = 'block';
     pauseIcon.style.display = 'none';
@@ -880,6 +1121,168 @@ function setupMarquee(wrapperId, direction = 'left') {
     animation-iteration-count: infinite;
     animation-fill-mode: forwards;
   `;
+}
+
+const allEpisodes = {{ all_episodes | tojson }};
+const episodesContainer = document.getElementById('archives');
+const archiveHeader = document.getElementById('archive-header');
+
+function renderEpisodes(page) {
+    let startIdx, endIdx;
+    
+    if (page === 1) {
+        startIdx = 0;
+        endIdx = 8;
+    } else {
+        startIdx = 8 + (page - 2) * 9;
+        endIdx = startIdx + 9;
+    }
+    
+    const episodesToShow = allEpisodes.slice(startIdx, endIdx);
+    
+    // Clear current episodes (keep header)
+    episodesContainer.innerHTML = '';
+    if (page==1) {
+        episodesContainer.appendChild(archiveHeader);
+    }
+    
+    episodesToShow.forEach(episode => {
+        const episodeDiv = document.createElement('div');
+        episodeDiv.className = 'episode';
+        episodeDiv.innerHTML = `
+            <div class="episode-thumbnail-container">
+                <img class="episode-thumbnail" src="${episode.thumbnail}" 
+                     onerror="this.onerror=null; this.src='assets/mtr.jpg';">
+            </div>
+            <div class="episode-info">
+                <div class="episode-title">${episode.title}</div>
+                <div class="episode-genres red">${episode.genre_string}</div>
+                <div class="episode-player">
+                    <div class="episode-play-button" id="play-${episode.id}" onclick="toggleEpisode('${episode.id}')">
+                              <svg class="episode-play-icon" viewBox="0 0 100 100" width="35px" height="60%">
+                                  <polygon class="episode-triangle" points="1,20 1,80 46,50" fill="black" ></polygon>
+                              </svg>
+                              <svg class="episode-pause-icon" viewBox="0 0 100 100" width="35px" height="60%">
+                                  <rect x="1" y="20" width="18" height="60" fill="black" ></rect>
+                                  <rect x="30" y="20" width="18" height="60" fill="black"></rect>
+                              </svg>
+                    </div>
+                    <div class="episode-seeker">
+                        <div class="episode-seeker-progress"></div>
+                    </div>
+                </div>
+                <audio id="${episode.id}" data-src="${episode.download}"></audio>
+            </div>
+        `;
+        episodesContainer.appendChild(episodeDiv);
+    });
+}
+
+function goToArchive() {
+  window.scrollTo({
+    top: document.getElementById('archives').getBoundingClientRect().top + window.pageYOffset - 100,
+    behavior: "smooth"
+  });
+}
+
+function showPage(page) {
+  const archiveHeader = document.getElementById('archive-header');
+    
+    if (page != 1) {
+        archiveHeader.style.display = 'none';
+    }
+    else {
+        archiveHeader.style.display = 'block';
+    }
+
+    document.querySelectorAll('.episode').forEach(episode => {
+        episode.style.display = 'none';
+    });
+    
+    document.querySelectorAll(`.episode[data-page="${page}"]`).forEach(episode => {
+        episode.style.display = 'flex';
+    });
+}
+
+// Handle pagination clicks
+document.querySelectorAll('.page').forEach(pageBtn => {
+    pageBtn.addEventListener('click', function() {
+        const page = parseInt(this.dataset.page);
+        document.querySelectorAll('.page').forEach(btn => btn.classList.remove('active-page'));
+        this.classList.add('active-page');
+        showPage(page);
+    });
+});
+
+showPage(1);
+document.querySelector('.page[data-page="1"]')?.classList.add('active-page');
+
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.episode-seeker').forEach(seeker => {
+        seeker.addEventListener('click', function(e) {
+            const episode = this.closest('.episode');
+            const audio = episode.querySelector('audio');
+            const progress = this.querySelector('.episode-seeker-progress');
+            
+            // Load audio if not loaded
+            if (!audio.src) {
+                audio.src = audio.dataset.src;
+            }
+            
+            // Calculate click position
+            const rect = this.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const percentage = clickX / rect.width;
+            
+            if (audio.readyState >= 1) {
+                audio.currentTime = audio.duration * percentage;
+            } else {
+                audio.addEventListener('loadedmetadata', function() {
+                    audio.currentTime = audio.duration * percentage;
+                }, { once: true });
+            }
+            
+            // If audio wasn't playing, start it 
+            if (audio.paused) {
+                audio.play();
+                const button = episode.querySelector('.episode-play-button');
+                const pauseIcon = button.querySelector('.episode-pause-icon');
+                const playIcon = button.querySelector('.episode-play-icon');
+                pauseIcon.style.display = 'block';
+                playIcon.style.display = 'none';
+            }
+        });
+    });
+    
+    // Update progress bar as audio plays
+    document.querySelectorAll('audio').forEach(audio => {
+        audio.addEventListener('timeupdate', function() {
+            const episode = this.closest('.episode');
+            const progress = episode.querySelector('.episode-seeker-progress');
+            const percentage = (this.currentTime / this.duration) * 100;
+            progress.style.width = percentage + '%';
+        });
+    });
+});
+
+function toggleEpisode(id) {
+    const thisAudio = document.getElementById(id);
+    const button = document.getElementById(`play-${id}`);
+    const pauseIcon = button.querySelector('.episode-pause-icon');
+    const playIcon = button.querySelector('.episode-play-icon');
+    
+    if (thisAudio.paused) {
+        if (thisAudio.src != thisAudio.dataset.src) {
+            thisAudio.src = thisAudio.dataset.src;
+        }
+        thisAudio.play();
+        pauseIcon.style.display = 'block';
+        playIcon.style.display = 'none';
+    } else {
+        thisAudio.pause();
+        pauseIcon.style.display = 'none';
+        playIcon.style.display = 'block';
+    }
 }
 
 </script>

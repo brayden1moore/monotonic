@@ -105,7 +105,9 @@ def refresh_archive_dict():
         if archive_file.endswith('.json'):
             with open(f'data/{archive_file}', 'r') as f:
                 data = json.load(f)
+                data['genre_string'] = ', '.join(data['genres'])
                 archive_id = data['id']
+                data['download'] = 'https://scudbucket.sfo3.cdn.digitaloceanspaces.com/monotonic-radio/' + data['filename']
                 logger.info(f"{ARCHIVE_PATH}/{data['filename']}")
                 if os.path.exists(f"{ARCHIVE_PATH}/{data['filename']}"):
                     archive_dict[archive_id] = data
@@ -360,7 +362,7 @@ def stream_playlist(chunk_size, chunks_between_checks):
     process = subprocess.Popen(
         cmd,
         stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,  # Changed from DEVNULL to capture errors
+        stderr=subprocess.PIPE,
         bufsize=chunk_size
     )
     
@@ -371,7 +373,7 @@ def stream_playlist(chunk_size, chunks_between_checks):
             chunk_count += 1
             
             if chunk_count % chunks_between_checks == 0:
-                # Check for live stream (higher priority)
+                # Check for live stream 
                 if check_for_live():
                     logger.info("Live stream detected, switching")
                     break
@@ -386,7 +388,7 @@ def stream_playlist(chunk_size, chunks_between_checks):
             
             chunk = process.stdout.read(chunk_size)
             if not chunk:
-                # Log WHY it ended
+                # Log why it ended
                 stderr_output = process.stderr.read().decode('utf-8', errors='ignore')
                 logger.info(f"End of track {track_id} - read {bytes_read} bytes")
                 if stderr_output:
@@ -473,12 +475,20 @@ def index():
     genres = ', '.join(archive_dict[archive_id]['genres'])
     description = archive_dict[archive_id]['description'].replace('\n', '<br>')
     
+    all_episodes = [val for _,val in archive_dict.items()]
+    random.shuffle(all_episodes)
+    remaining_after_first = len(all_episodes) - 8
+    pages = 1 + (remaining_after_first + 8) // 9 if len(all_episodes) > 8 else 1
+
     return render_template(
         'index.html',
         now_playing=current,
         genres=genres,
         description=description,
-        thumbnail=get_thumbnail(archive_id)
+        thumbnail=get_thumbnail(archive_id),
+        episodes=all_episodes,
+        all_episodes=all_episodes,
+        pages = pages
     )
 
 
@@ -681,4 +691,4 @@ def upload():
 get_current()
 
 if __name__ == '__main__':
-    app.run(debug=False, port=8888, threaded=True)
+    app.run(debug=True, port=8888, threaded=True)
