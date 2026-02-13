@@ -171,7 +171,7 @@
                       <div class="episode-seeker">
                         <div class="episode-seeker-progress"></div>
                       </div>
-                          <audio class="episode-audio" id= {{ episode.id }} data-src= {{ episode.download }}></audio>
+                          <audio class="episode-audio" id= {{ episode.id }} data-title= "{{ episode.title }}" data-artwork= "{{ episode.thumbnail }}" data-src= {{ episode.download }}></audio>
                     </div>
                 </div>
             </div> 
@@ -903,7 +903,7 @@ const noVideo = document.getElementById('no-video');
 const circles = document.getElementById('circles');
 const circleMobile = document.getElementById('circle-mobile');
 const infoDiv = document.getElementById('info-div');
-const audio = document.getElementById('audio');
+const mainAudio = document.getElementById('audio');
 const pauseIcon = document.getElementById('pause-icon');
 const playIcon = document.getElementById('play-icon');
 const genres = document.getElementById('genres');
@@ -917,8 +917,8 @@ const streamEmbed = document.getElementById('stream');
 const orgs = document.querySelector('.colors');
 
 function toggle(forcePause=false) {
-  if (!audio.paused | forcePause==true) {
-    audio.pause();
+  if (!mainAudio.paused | forcePause==true) {
+    mainAudio.pause();
     playIcon.style.display = 'block';
     pauseIcon.style.display = 'none';
     playIconCircle.style.display = 'block';
@@ -933,7 +933,7 @@ function toggle(forcePause=false) {
   }
   else {
     orgs.style.display = 'flex';
-    audio.play();
+    mainAudio.play();
     setupMarquee('play');
     playIcon.style.display = 'none';
     pauseIcon.style.display = 'block';
@@ -957,7 +957,7 @@ const offline = document.getElementById('live-status-offline');
 const stream = document.getElementById('stream');
 const video = document.getElementById('stream-and-chat');
 
-function updateMediaSession(title, artist, artwork) {
+function updateMediaSession(title, artist='Monotonic Radio', artwork, audio=mainAudio) {
   if ('mediaSession' in navigator) {
     navigator.mediaSession.metadata = new MediaMetadata({
       title: title,
@@ -1057,13 +1057,16 @@ function getUpdatedInfo() {
           titleInfo.innerHTML = json['now_playing'];
           descriptionInfo.innerHTML = json['video_description'].replace(/\n/g, '<br>');
           genres.textContent = json['genres'].join(', ');
-          updateMediaSession(json['now_playing'], 'Monotonic Radio', 'assets/mtr.jpg');
+          if (archivePlaying == false) {
+              updateMediaSession(json['now_playing'], 'Monotonic Radio', 'assets/mtr.jpg');
+          }
       });
 }
 
 getUpdatedInfo();
 setInterval(getUpdatedInfo, 3000);
 
+archivePlaying = false;
 
 function setupMarquee(wrapperId, direction = 'left') {
   const wrapper = document.getElementById(wrapperId);
@@ -1275,6 +1278,13 @@ function toggleEpisode(id) {
     const button = document.getElementById(`play-${id}`);
     const pauseIcon = button.querySelector('.episode-pause-icon');
     const playIcon = button.querySelector('.episode-play-icon');
+
+    updateMediaSession(
+      thisAudio.dataset.title,      // title
+      'Monotonic Radio',             // artist 
+      thisAudio.dataset.artwork,     // artwork
+      thisAudio                      // audio
+    );
     
     allAudios = document.querySelectorAll(".episode-audio");
     allAudios.forEach(audio => {
@@ -1292,10 +1302,12 @@ function toggleEpisode(id) {
         if (thisAudio.src != thisAudio.dataset.src) {
             thisAudio.src = thisAudio.dataset.src;
         }
+        archivePlaying = true;
         thisAudio.play();
         pauseIcon.style.display = 'block';
         playIcon.style.display = 'none';
     } else {
+        archivePlaying = true;
         thisAudio.pause();
         pauseIcon.style.display = 'none';
         playIcon.style.display = 'block';
