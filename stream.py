@@ -391,92 +391,65 @@ def stream_playlist(chunk_size, chunks_between_checks):
     finally:
         cleanup_process(process)
 
+
 class StreamBroadcaster:
-    """Manages a single stream broadcast to multiple clients"""
-    
     def __init__(self):
-        self.clients = {}
-        self.client_id_counter = 0
+        self.clients = set()
         self.lock = threading.Lock()
-        self.broadcast_thread = None
-        self.running = False
     
-    def start_broadcast(self):
-        """Start the broadcast thread if not already running"""
-        if self.broadcast_thread and self.broadcast_thread.is_alive():
-            return
-        
-        self.running = True
-        self.broadcast_thread = threading.Thread(target=self._broadcast_loop, daemon=True)
-        self.broadcast_thread.start()
-        logger.info("Broadcast thread started")
-    
-    def _broadcast_loop(self):
-        """Main broadcast loop - generates stream and distributes to clients"""
+    def _generate_master_stream(self):
+        """The ONE stream that feeds everyone"""
         CHUNK_SIZE = 8192
         CHUNKS_BETWEEN_CHECKS = 25
-        LIVE_CHECK_INTERVAL = 3
         
-        while self.running:
-            while self.running:
-                with self.lock:
-                    if self.clients:
-                        break
-                time.sleep(0.1)
-            
-            if not self.running:
-                break
-            
+        while True:
             try:
+                # Check for live
                 live_info = check_for_live()
                 
+                # Create stream generator
                 if live_info:
                     stream_generator = stream_live(live_info, CHUNK_SIZE, CHUNKS_BETWEEN_CHECKS)
                 else:
                     stream_generator = stream_playlist(CHUNK_SIZE, CHUNKS_BETWEEN_CHECKS)
                 
+                # Broadcast each chunk to all clients
                 for chunk in stream_generator:
                     with self.lock:
-                        if not self.clients:
-                            break
-                        
-                        dead_clients = []
-                        for client_id, client_queue in self.clients.items():
+                        dead_clients = set()
+                        for client_queue in self.clients:
                             try:
                                 client_queue.put_nowait(chunk)
-                            except queue.Full:
-                                logger.warning(f"Client {client_id} queue full, disconnecting")
-                                dead_clients.append(client_id)
+                            except:
+                                dead_clients.add(client_queue)
                         
-                        for client_id in dead_clients:
-                            del self.clients[client_id]
-                            
+                        self.clients -= dead_clients
+            
             except Exception as e:
                 logger.error(f"Broadcast error: {e}", exc_info=True)
                 time.sleep(1)
     
-    def add_client(self):
-        """Register a new client"""
-        with self.lock:
-            client_id = self.client_id_counter
-            self.client_id_counter += 1
-            client_queue = queue.Queue(maxsize=100)
-            self.clients[client_id] = client_queue
-            
-            logger.info(f"Client {client_id} connected. Total clients: {len(self.clients)}")
-            return client_id, client_queue
+    def start(self):
+        """Start broadcasting in background thread"""
+        thread = threading.Thread(target=self._generate_master_stream, daemon=True)
+        thread.start()
     
-    def remove_client(self, client_id):
-        """Unregister a client"""
+    def add_client(self):
+        """New client wants to listen"""
+        client_queue = queue.Queue(maxsize=50)
         with self.lock:
-            if client_id in self.clients:
-                del self.clients[client_id]
-                logger.info(f"Client {client_id} disconnected. Total clients: {len(self.clients)}")
+            self.clients.add(client_queue)
+        return client_queue
+    
+    def remove_client(self, client_queue):
+        """Client disconnected"""
+        with self.lock:
+            self.clients.discard(client_queue)
 
 
-# Initialize broadcast
+# Start the single broadcast
 broadcaster = StreamBroadcaster()
-broadcaster.start_broadcast()
+broadcaster.start()
 
 # ============================================================================
 # FLASK ROUTES
@@ -501,22 +474,21 @@ def index():
         thumbnail=get_thumbnail(archive_id)
     )
 
+
 @app.route('/stream')
 def stream():
-    """Stream endpoint - broadcasts audio to clients"""
-    client_id, client_queue = broadcaster.add_client()
+    """Clients tune in to the broadcast"""
+    client_queue = broadcaster.add_client()
     
     def generate():
         try:
             while True:
-                try:
-                    chunk = client_queue.get(timeout=10)
-                    yield chunk
-                except queue.Empty:
-                    logger.warning(f"Client {client_id} timeout")
-                    break
+                chunk = client_queue.get(timeout=30)
+                yield chunk
+        except:
+            pass
         finally:
-            broadcaster.remove_client(client_id)
+            broadcaster.remove_client(client_queue)
     
     return Response(
         generate(),
