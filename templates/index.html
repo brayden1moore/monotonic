@@ -169,7 +169,7 @@
                       <div class="episode-seeker">
                         <div class="episode-seeker-progress"></div>
                       </div>
-                          <audio id= {{ episode.id }} data-src= {{ episode.download }}></audio>
+                          <audio class="episode-audio" id= {{ episode.id }} data-src= {{ episode.download }}></audio>
                     </div>
                 </div>
             </div> 
@@ -1243,6 +1243,8 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             // If audio wasn't playing, start it 
+
+            /*
             if (audio.paused) {
                 audio.play();
                 const button = episode.querySelector('.episode-play-button');
@@ -1251,6 +1253,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 pauseIcon.style.display = 'block';
                 playIcon.style.display = 'none';
             }
+              */
         });
     });
     
@@ -1271,6 +1274,18 @@ function toggleEpisode(id) {
     const pauseIcon = button.querySelector('.episode-pause-icon');
     const playIcon = button.querySelector('.episode-play-icon');
     
+    allAudios = document.querySelectorAll(".episode-audio");
+    allAudios.forEach(audio => {
+      if (audio != thisAudio) {
+          audio.pause();
+          const button = audio.closest('.episode').querySelector('.episode-play-button');
+          const pauseIcon = button.querySelector('.episode-pause-icon');
+          const playIcon = button.querySelector('.episode-play-icon');
+          pauseIcon.style.display = 'none';
+          playIcon.style.display = 'block';
+      }
+    })
+
     if (thisAudio.paused) {
         if (thisAudio.src != thisAudio.dataset.src) {
             thisAudio.src = thisAudio.dataset.src;
