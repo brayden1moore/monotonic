@@ -428,39 +428,29 @@ class StreamBroadcaster:
                 break
             
             try:
-                last_live_check = time.time()
+                live_info = check_for_live()
                 
-                while self.running:
-                    current_time = time.time()
-                    
-                    if current_time - last_live_check >= LIVE_CHECK_INTERVAL:
-                        live_info = check_for_live()
-                        last_live_check = current_time
-                    else:
-                        live_info = None
-                    
-                    # Generate appropriate stream
-                    if live_info:
-                        stream_generator = stream_live(live_info, CHUNK_SIZE, CHUNKS_BETWEEN_CHECKS)
-                    else:
-                        stream_generator = stream_playlist(CHUNK_SIZE, CHUNKS_BETWEEN_CHECKS)
-                    
-                    for chunk in stream_generator:
-                        with self.lock:
-                            if not self.clients:
-                                break
+                if live_info:
+                    stream_generator = stream_live(live_info, CHUNK_SIZE, CHUNKS_BETWEEN_CHECKS)
+                else:
+                    stream_generator = stream_playlist(CHUNK_SIZE, CHUNKS_BETWEEN_CHECKS)
+                
+                for chunk in stream_generator:
+                    with self.lock:
+                        if not self.clients:
+                            break
+                        
+                        dead_clients = []
+                        for client_id, client_queue in self.clients.items():
+                            try:
+                                client_queue.put_nowait(chunk)
+                            except queue.Full:
+                                logger.warning(f"Client {client_id} queue full, disconnecting")
+                                dead_clients.append(client_id)
+                        
+                        for client_id in dead_clients:
+                            del self.clients[client_id]
                             
-                            dead_clients = []
-                            for client_id, client_queue in self.clients.items():
-                                try:
-                                    client_queue.put_nowait(chunk)
-                                except queue.Full:
-                                    logger.warning(f"Client {client_id} queue full, disconnecting")
-                                    dead_clients.append(client_id)
-                            
-                            for client_id in dead_clients:
-                                del self.clients[client_id]
-                                
             except Exception as e:
                 logger.error(f"Broadcast error: {e}", exc_info=True)
                 time.sleep(1)
