@@ -315,13 +315,13 @@
     transition: 0.1s;
   }
 
-  .episode:hover {
+  .episode-playing {
     color: white;
     background-color:black;
   }
 
 
-  .episode:hover .episode-seeker{
+  .episode-playing .episode-seeker{
     background-color:rgb(255, 255, 255);
   }
 
@@ -330,7 +330,7 @@
     display: none;
   }
 
-  .episode:hover polygon, .episode:hover rect{
+  .episode-playing polygon, \.episode-playing rect{
     fill: white ;
   }
 
@@ -1278,6 +1278,7 @@ function toggleEpisode(id) {
     const button = document.getElementById(`play-${id}`);
     const pauseIcon = button.querySelector('.episode-pause-icon');
     const playIcon = button.querySelector('.episode-play-icon');
+    const thisEpisode = thisAudio.closest('.episode');
 
     updateMediaSession(
       thisAudio.dataset.title,      // title
@@ -1290,7 +1291,9 @@ function toggleEpisode(id) {
     allAudios.forEach(audio => {
       if (audio != thisAudio) {
           audio.pause();
-          const button = audio.closest('.episode').querySelector('.episode-play-button');
+          thatEpisode = audio.closest('.episode');
+          thatEpisode.classList.remove('episode-playing');
+          const button = thatEpisode.querySelector('.episode-play-button');
           const pauseIcon = button.querySelector('.episode-pause-icon');
           const playIcon = button.querySelector('.episode-play-icon');
           pauseIcon.style.display = 'none';
@@ -1303,6 +1306,7 @@ function toggleEpisode(id) {
             thisAudio.src = thisAudio.dataset.src;
         }
         archivePlaying = true;
+        thisEpisode.classList.add('episode-playing');
         thisAudio.play();
         pauseIcon.style.display = 'block';
         playIcon.style.display = 'none';
