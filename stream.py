@@ -419,8 +419,10 @@ class StreamBroadcaster:
                 # Create stream generator
                 if live_info:
                     stream_generator = stream_live(live_info, CHUNK_SIZE, CHUNKS_BETWEEN_CHECKS)
+                    logger.info('Switching to Live')
                 else:
                     stream_generator = stream_playlist(CHUNK_SIZE, CHUNKS_BETWEEN_CHECKS)
+                    logger.info('Switching to Archive')
                 
                 # Broadcast each chunk to all clients
                 for chunk in stream_generator:
