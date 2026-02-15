@@ -350,9 +350,9 @@ def stream_playlist(chunk_size, chunks_between_checks):
     
     cmd = [
         'ffmpeg',
-        '-ss', str(video_elapsed), 
+        '-re',
+        '-ss', str(video_elapsed) if video_elapsed > 0 else '0',  # Only seek if needed
         '-i', mp3_path,
-        '-re',                      
         '-f', 'mp3',
         '-b:a', '128k',
         '-ar', '44100',
