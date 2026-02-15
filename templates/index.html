@@ -59,7 +59,7 @@
     
     <div id="pemdas">
     <div id="stream-and-chat">
-      <div id="video">
+      <div id="video-div">
         <img id="no-video" src="assets/novideo.png" style="display: none;" onclick="toggle()">
         <iframe id="stream" src="" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
       </div>
@@ -679,7 +679,7 @@
     display: block;
   }
 
-  #video {
+  #video-div {
     width: 95%;
     aspect-ratio: 16 / 9.5;
     display: flex;
@@ -699,7 +699,7 @@
     text-align: left;
   }
 
-  #video iframe {
+  #video-div iframe {
     background-color: white;
     border: none;
     top: 0;
@@ -820,7 +820,7 @@
           }
 
 
-       #video iframe {
+       #video-div iframe {
           width: 100%;
        }
 
@@ -843,7 +843,7 @@
         width: 100%;
        }
 
-       #video {
+       #video-div {
         aspect-ratio: 16/9;
         width: 74.75%;
        }
