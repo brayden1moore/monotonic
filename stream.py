@@ -9,6 +9,7 @@ import subprocess
 import threading
 import queue
 import logging
+import collections 
 from datetime import datetime
 from flask import Flask, request, Response, redirect, render_template, session as flask_session
 from flask_cors import CORS
@@ -351,7 +352,7 @@ def stream_playlist(chunk_size, chunks_between_checks):
     cmd = [
         'ffmpeg',
         '-re',
-        '-ss', str(video_elapsed) if video_elapsed > 0 else '0',  # Only seek if needed
+        '-ss', str(video_elapsed) if video_elapsed > 0 else '0', 
         '-i', mp3_path,
         '-f', 'mp3',
         '-b:a', '128k',
@@ -405,6 +406,7 @@ class StreamBroadcaster:
     def __init__(self):
         self.clients = set()
         self.lock = threading.Lock()
+        self.buffer = collections.deque(maxlen=10)
     
     def _generate_master_stream(self):
         """The ONE stream that feeds everyone"""
@@ -426,6 +428,7 @@ class StreamBroadcaster:
                 
                 # Broadcast each chunk to all clients
                 for chunk in stream_generator:
+                    self.buffer.append(chunk)
                     with self.lock:
                         dead_clients = set()
                         for client_queue in self.clients:
@@ -446,9 +449,10 @@ class StreamBroadcaster:
         thread.start()
     
     def add_client(self):
-        """New client wants to listen"""
-        client_queue = queue.Queue(maxsize=50)
+        client_queue = queue.Queue(maxsize=100)
         with self.lock:
+            for chunk in self.buffer:          # seed with recent audio
+                client_queue.put_nowait(chunk)
             self.clients.add(client_queue)
         return client_queue
     
