@@ -331,16 +331,23 @@ def stream_live(live_info, chunk_size, chunks_between_checks):
     finally:
         cleanup_process(process)
 
-
-def stream_playlist(chunk_size, chunks_between_checks):
+def stream_playlist(chunk_size, chunks_between_checks, skip_track_id=None):
     """Stream archived content using ffmpeg"""
     current_result = get_current()
     if not current_result:
         logger.error("get_current() returned None")
         time.sleep(1)
         return
-    
+
     current_video, track_id, mp3_path, video_elapsed, bitrate = current_result
+
+    if track_id == skip_track_id:
+        logger.info(f"Still on finished track {track_id}, waiting for next...")
+        time.sleep(2)
+        current_result = get_current()
+        if not current_result:
+            return
+        current_video, track_id, mp3_path, video_elapsed, bitrate = current_result
     
     if not os.path.exists(mp3_path):
         logger.warning(f"File not found: {mp3_path}")
@@ -412,21 +419,18 @@ class StreamBroadcaster:
         """The ONE stream that feeds everyone"""
         CHUNK_SIZE = 8192
         CHUNKS_BETWEEN_CHECKS = 25
+        last_track_id = None
         
         while True:
             try:
-                # Check for live
                 live_info = check_for_live()
-                
-                # Create stream generator
                 if live_info:
                     stream_generator = stream_live(live_info, CHUNK_SIZE, CHUNKS_BETWEEN_CHECKS)
                     logger.info('Switching to Live')
                 else:
-                    stream_generator = stream_playlist(CHUNK_SIZE, CHUNKS_BETWEEN_CHECKS)
+                    stream_generator = stream_playlist(CHUNK_SIZE, CHUNKS_BETWEEN_CHECKS, skip_track_id=last_track_id)  # <-- pass it
                     logger.info('Switching to Archive')
-                
-                # Broadcast each chunk to all clients
+
                 for chunk in stream_generator:
                     self.buffer.append(chunk)
                     with self.lock:
@@ -436,9 +440,13 @@ class StreamBroadcaster:
                                 client_queue.put_nowait(chunk)
                             except:
                                 dead_clients.add(client_queue)
-                        
                         self.clients -= dead_clients
-            
+
+                # After generator exhausts, capture what track just finished
+                result = get_current()
+                if result:
+                    last_track_id = result[1]  # <-- record it
+
             except Exception as e:
                 logger.error(f"Broadcast error: {e}", exc_info=True)
                 time.sleep(1)
