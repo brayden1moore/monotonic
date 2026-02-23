@@ -578,8 +578,8 @@ def index():
     
     all_episodes = [val for _,val in archive_dict.items()]
     random.shuffle(all_episodes)
-    remaining_after_first = len(all_episodes) - 8
-    pages = 1 + (remaining_after_first + 8) // 9 if len(all_episodes) > 8 else 1
+    remaining_after_first = len(all_episodes) - 9
+    pages = (len(all_episodes) // 9) + 1
 
     return render_template(
         'index.html',
