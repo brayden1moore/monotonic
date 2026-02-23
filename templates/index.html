@@ -165,13 +165,15 @@
                   </div>
                   <div class="episode-info">
                       <div class="episode-title">{{ episode.title }}                       
+
+                    </div>
+                    <div class="episode-genre-and-date-div">
+                      <div class="episode-genres red">{{ episode.genre_string }}</div>
+                      <div class="episode-date">{{ episode.date | dateformat }}</div>
                         <a class="dl-link" target="_blank" href="{{ episode.download }}">
                           <img src="assets/dl.png" class="dl-icon">
                         </a>
                     </div>
-                      <div class="episode-genres red">{{ episode.genre_string }}</div>
-
-
 
                       <div class="episode-player">
                             <div class="episode-play-button" id="play-{{ episode.id }}" onclick="toggleEpisode('{{ episode.id }}')">
@@ -248,13 +250,22 @@
 </body>
 
 <style>
+
+  .episode-genre-and-date-div {
+    display: flex;
+  }
+  .episode-date {
+    opacity: 0.3;
+    margin-left: 5px;
+    padding: 0px 3px;
+  }
   .dl-icon {
     width: 12px;
     height: 12px;
   }
 
   .dl-link {
-    margin-left: 3px;
+    margin-left: 5px;
     color: black;
     opacity: 0.3;
     transition: 0.1s ease;
@@ -367,7 +378,7 @@
   }
 
   .episode {
-    max-height: 150px;
+    max-height: 130px;
     cursor: default;
     align-items: center;
     font-family: 'Archivo Regular';
@@ -416,14 +427,13 @@
     .episode-info {
       width: 100%;
         display: block;
-        padding: 20px;
+        padding: 12px;
         height: fit-content;
     }
     .episode-thumbnail-container {
       cursor: pointer;
-        height: 150px;
-        width: 150px;
-        margin-right: 10px;
+        height: 130px;
+        width: 130px;
         border-right: 1px solid black;
         aspect-ratio: 1 / 1;
     }

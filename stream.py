@@ -108,6 +108,8 @@ def refresh_archive_dict():
                 data = json.load(f)
                 data['genre_string'] = ', '.join(data['genres'])
                 archive_id = data['id']
+                if data['show'] == 'c':
+                    data['title'] = ' - '.join(data['title'].split(' - ')[:-1])
                 data['download'] = 'https://scudbucket.sfo3.cdn.digitaloceanspaces.com/monotonic-radio/' + data['filename']
                 logger.info(f"{ARCHIVE_PATH}/{data['filename']}")
                 if os.path.exists(f"{ARCHIVE_PATH}/{data['filename']}"):
@@ -678,8 +680,12 @@ def get_user_episodes(user_shows):
         if val['show'] in user_shows:
             val['genre_string'] = ', '.join(val['genres'])
             user_episodes.append(val)    
-    user_episodes = sorted(user_episodes, key=lambda d: d['date'], reverse=True)
+    user_episodes = sorted(user_episodes, key=lambda d: d['date'])
     return user_episodes
+
+@app.template_filter('dateformat')
+def dateformat(value):
+    return datetime.strptime(value, '%Y-%m-%d').strftime('%b %d, %Y')
 
 @app.route('/upload', methods=['GET', 'POST'])
 def upload():
