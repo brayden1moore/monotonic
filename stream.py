@@ -467,30 +467,38 @@ class StreamBroadcaster:
         """Client disconnected"""
         with self.lock:
             self.clients.discard(client_queue)
-
+            
 def stream_simple():
-
     while True:
         current, track_id, mp3_path, elapsed, byterate, duration = get_current()
         start_chunk = round(elapsed * byterate)
         
         logger.info(current)
         logger.info(f'START CHUNK: {start_chunk}')
-        logger.info(f'elapsed: {elapsed}')
-        logger.info(f'duration: {duration}')
+        logger.info(f'elapsed: {elapsed}, duration: {duration}')
         logger.info(f'total chunks: {round(duration * byterate)}')
         
-        last_check_for_current = time.time()
-
+        last_check = time.time()
+        track_done = False
+        
         with open(mp3_path, 'rb') as f:
             f.seek(start_chunk)
-            while chunk := f.read(1024): # while there are chunks in current mp3
-                if (time.time() - last_check_for_current >= 5): # first keep tabs on elapsed vs duration every 5 sec or so
-                    _, _, _, elapsed_check, _, _ = get_current() 
-                    last_check_for_current = time.time()
-                    if (duration - elapsed_check) <= 1: # if end of track, break
+            while chunk := f.read(1024):
+                if time.time() - last_check >= 5:
+                    _, _, _, elapsed_check, _, _ = get_current()
+                    last_check = time.time()
+                    logger.info(f'elapsed check: {elapsed_check}, duration: {duration}')
+                    if duration - elapsed_check <= 1:
+                        logger.info('End of track detected, switching...')
+                        track_done = True
                         break
-                yield chunk # yield chunks
+                yield chunk
+        
+        if not track_done:
+            # File ended naturally before our check caught it — still move on
+            logger.info('File exhausted, waiting for next track...')
+        
+        time.sleep(1) 
 
 
 # Start the single broadcast
