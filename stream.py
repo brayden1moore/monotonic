@@ -521,7 +521,7 @@ def index():
     if not result:
         return "Stream not ready", 503
     
-    current, archive_id, mp3_path, video_elapsed, byterate = result
+    current, archive_id, mp3_path, video_elapsed, byterate, duration = result
     genres = ', '.join(archive_dict[archive_id]['genres'])
     description = archive_dict[archive_id]['description'].replace('\n', '<br>')
     
