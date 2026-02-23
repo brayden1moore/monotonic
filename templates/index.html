@@ -179,8 +179,19 @@
                         <div class="episode-seeker">
                           <div class="episode-seeker-progress"></div>
                         </div>
+
+                            {% set t = episode.duration | int %}
+                            {% set seconds = t % 60 %}
+                            {% set minutes = (t // 60) % 60 %}
+                            {% set hours = t // 3600 %}
+                            {% if hours > 0 %}
+                                {{ "%d:%02d:%02d" | format(hours, minutes, seconds) }}
+                            {% else %}
+                                {{ "%d:%02d" | format(minutes, seconds) }}
+                            {% endif %}
+
                             <audio class="episode-audio" id= {{ episode.id }} data-title= "{{ episode.title }}" data-artwork= "{{ episode.thumbnail }}" data-src= {{ episode.download }}></audio>
-                      </div>
+                        </div>
                   </div>
               </div> 
               {% set ns.count = ns.count + 1 %}
@@ -251,12 +262,12 @@
       margin-left: -10px;
       width: 100%;
       height: 10px;
-      border-radius: 20px;
-      background: rgb(223, 223, 223);
+      background: rgb(74, 128, 255);
       border: 1px solid black;
       cursor: poinrgb(0, 0, 0);
       position: relative;
       margin-top: 0px;
+      margin-right: 8px;
   }
 
   html {
@@ -270,12 +281,11 @@
   }
 
   .episode-seeker-progress {
-      border-radius: 20px 0px 0px 20px;
       height: 100%;
-      background: rgb(74, 128, 255);
+      background: black;
       width: 0%;
       pointer-events: none;
-      transition: 0.2s ease;
+      transition: 0.1s ease;
 
   }
 
@@ -347,8 +357,10 @@
 
 
   .episode-playing .episode-seeker{
-    background-color:rgb(255, 255, 255);
+    border-color: white;
   }
+
+
 
   .episode-pause-icon {
     fill: black !important;
@@ -834,6 +846,23 @@
     line-height: 0.5em;
     letter-spacing: -0.05em;
   }
+
+  @keyframes fadeIn {
+      0% {
+          opacity: 0;
+      }
+      100% {
+          opacity: 1;
+      }
+  }
+
+  .fade-in-element {
+    animation-name: fadeIn;
+    animation-duration: 0.5s; 
+    animation-timing-function: ease-in-out; 
+    animation-fill-mode: forwards; 
+  }
+
   @font-face {
       font-family: "Archivo SemiBold";
       src: url("assets/Archivo-SemiBold.ttf") format("truetype");
@@ -1252,6 +1281,7 @@ function showPage(page) {
     
     document.querySelectorAll(`.episode[data-page="${page}"]`).forEach(episode => {
         episode.style.display = 'flex';
+        episode.classList.add('fade-in-element');
     });
 }
 
@@ -1357,6 +1387,7 @@ function toggleEpisode(id) {
         pauseIcon.style.display = 'block';
         playIcon.style.display = 'none';
     } else {
+        thisEpisode.classList.remove('episode-playing');
         archivePlaying = true;
         thisAudio.pause();
         pauseIcon.style.display = 'none';
@@ -1369,7 +1400,7 @@ const searchInput = document.getElementById('search-archives');
 const placeHolderList = [
             'Search for "Jazz"',
             'Search for "Moonlighting"',
-            'Search for "Voices Radio"',
+            'Search for "Voices"',
             'Search for "02-22-26"',
             'Search for "Experimental"',
             'Search for "Venezuela"',
