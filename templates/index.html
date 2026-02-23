@@ -164,8 +164,15 @@
                       <img class="episode-thumbnail" src="{{ episode.thumbnail }}" onerror="this.onerror=null; this.src='assets/mtr.jpg';">
                   </div>
                   <div class="episode-info">
-                      <div class="episode-title">{{ episode.title }}</div>
+                      <div class="episode-title">{{ episode.title }}                       
+                        <a class="dl-link" target="_blank" href="{{ episode.download }}">
+                          <img src="assets/dl.png" class="dl-icon">
+                        </a>
+                    </div>
                       <div class="episode-genres red">{{ episode.genre_string }}</div>
+
+
+
                       <div class="episode-player">
                             <div class="episode-play-button" id="play-{{ episode.id }}" onclick="toggleEpisode('{{ episode.id }}')">
                                 <svg class="episode-play-icon" viewBox="0 0 100 100" width="35px" height="60%">
@@ -193,6 +200,7 @@
                             <audio class="episode-audio" id= {{ episode.id }} data-title= "{{ episode.title }}" data-artwork= "{{ episode.thumbnail }}" data-src= {{ episode.download }}></audio>
                         </div>
                   </div>
+
               </div> 
               {% set ns.count = ns.count + 1 %}
             {% endfor %} 
@@ -240,6 +248,20 @@
 </body>
 
 <style>
+  .dl-icon {
+    width: 12px;
+    height: 12px;
+  }
+
+  .dl-link {
+    margin-left: 3px;
+    color: black;
+    opacity: 0.3;
+    transition: 0.1s ease;
+  }
+  .dl-link:hover {
+    opacity: 1;
+  }
   #search-bar-and-icon {
     display: flex;
     align-items: end;
@@ -252,9 +274,13 @@
   }
 
   .episode-player {
-    margin-top: 5px;
-    display: flex;
-    align-items: center;
+      padding: 0px 10px;
+      border: 1px dotted black;
+      /* background-color: rgb(233,233,233); */
+      margin-top: 10px;
+      margin-bottom: 5px;
+      display: flex;
+      align-items: center;
   }
 
   .episode-seeker {
