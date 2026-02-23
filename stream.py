@@ -442,10 +442,9 @@ class StreamBroadcaster:
                                 dead_clients.add(client_queue)
                         self.clients -= dead_clients
 
-                # After generator exhausts, capture what track just finished
                 result = get_current()
                 if result:
-                    last_track_id = result[1]  # <-- record it
+                    last_track_id = result[1] 
 
             except Exception as e:
                 logger.error(f"Broadcast error: {e}", exc_info=True)
@@ -468,6 +467,15 @@ class StreamBroadcaster:
         """Client disconnected"""
         with self.lock:
             self.clients.discard(client_queue)
+
+def stream_simple():
+    current, track_id, mp3_path, elapsed, bitrate = get_current()
+
+    with open(mp3_path, 'rb') as f:
+        chunk = f.read(1024)
+        while chunk:
+            yield chunk
+            chunk = f.read(1024)
 
 
 # Start the single broadcast
@@ -523,6 +531,21 @@ def stream():
     
     return Response(
         generate(),
+        mimetype='audio/mpeg',
+        headers={
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0',
+            'X-Accel-Buffering': 'no'
+        }
+    )
+
+@app.route('/stream-test')
+def stream():
+    """Clients tune in to the broadcast"""
+
+    return Response(
+        stream_simple(),
         mimetype='audio/mpeg',
         headers={
             'Cache-Control': 'no-cache, no-store, must-revalidate',
