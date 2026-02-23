@@ -470,17 +470,16 @@ class StreamBroadcaster:
 
 def stream_simple():
     current, track_id, mp3_path, elapsed, bitrate = get_current()
-
     start_chunk = round(elapsed * bitrate)
+    
     logger.info(current)
-    logger.info('START CHUNK')
-    logger.info(elapsed)
-    logger.info(start_chunk)
+    logger.info(f'START CHUNK: {start_chunk}')
+    logger.info(f'elapsed: {elapsed}')
+    
     with open(mp3_path, 'rb') as f:
-        chunk = f.read(start_chunk)
-        while chunk:
+        f.seek(start_chunk)
+        while chunk := f.read(1024):
             yield chunk
-            chunk = f.read(1024)
 
 
 # Start the single broadcast
