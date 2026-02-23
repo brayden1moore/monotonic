@@ -410,6 +410,7 @@ def stream_playlist(chunk_size, chunks_between_checks, skip_track_id=None):
 
 CHUNK_SIZE = 8192
 CHUNKS_BETWEEN_CHECKS = 25
+BUFFER_SECONDS = 4
 def stream_simple():
     first_open = True
     track_over = False
@@ -467,20 +468,28 @@ def stream_simple():
 
             if first_open or track_over:
                 with open(mp3_path, 'rb') as f:
-                    first_open = False
                     f.seek(start_chunk)
+                    
+                    # pre-yield a buffer burst to fill client's buffer
+                    prebuffer = f.read(int(byterate * BUFFER_SECONDS))
+                    yield prebuffer
+                    
+                    # now pace the rest at real playback speed
                     live_detected = False
                     while chunk := f.read(1024):
+                        yield chunk
+                        time.sleep(1024 / byterate)
+
                         if (time.time() - last_check_for_current >= 5):
                             _, _, _, elapsed_check, _, _ = get_current()
                             last_check_for_current = time.time()
                             if (duration - elapsed_check) <= 1:
                                 track_over = True
                                 break
-                            if check_for_live():          # <-- add this
+                            if check_for_live():
                                 live_detected = True
                                 break
-                        yield chunk
+                    
                     if live_detected:
                         break
                         
