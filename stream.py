@@ -419,7 +419,9 @@ def stream_simple():
     while True:
 
         if check_for_live():
-            logger.info("Live stream detected, switching")    
+            logger.info("Live stream detected, switching")  
+            need_to_switch_to_archive = True # flag so the next block knows to reopen the file
+            
             mpv_command = [
                 "mpv",
                 "--no-video",
@@ -454,7 +456,6 @@ def stream_simple():
                 
                 yield chunk
             
-            need_to_switch_to_archive = True
             break
 
         else:
