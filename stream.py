@@ -408,14 +408,51 @@ def stream_playlist(chunk_size, chunks_between_checks, skip_track_id=None):
     finally:
         cleanup_process(process)
 
+CHUNK_SIZE = 8192
+CHUNKS_BETWEEN_CHECKS = 25
 def stream_simple():
     first_open = True
     track_over = False
 
     while True:
+
         if check_for_live():
-            logger.info("Live stream detected, switching")
+            logger.info("Live stream detected, switching")    
+            mpv_command = [
+                "mpv",
+                "--no-video",
+                "--no-terminal",
+                "--o=-",
+                "--of=mp3",
+                "--oac=libmp3lame",
+                "--oacopts=b=128k",
+                LIVE_STREAM_URL
+            ]
+            
+            process = subprocess.Popen(
+                mpv_command,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                bufsize=CHUNK_SIZE
+            )
+            
+            chunk_count = 0
+            while True:
+                chunk_count += 1
+                
+                if chunk_count % CHUNKS_BETWEEN_CHECKS == 0:
+                    if not check_for_live():
+                        logger.info("Live stream ended, switching back to playlist")
+                        break
+                
+                chunk = process.stdout.read(CHUNK_SIZE)
+                if not chunk:
+                    logger.warning("Live stream ended unexpectedly")
+                    break
+                
+                yield chunk
             break
+
         else:
             current, track_id, mp3_path, elapsed, byterate, duration = get_current()
             start_chunk = round(elapsed * byterate)
@@ -444,7 +481,7 @@ def stream_simple():
                                 break
                             
                         yield chunk
-        time.sleep(1)
+        time.sleep(3)
 
 class StreamBroadcaster:
     def __init__(self):
@@ -509,6 +546,44 @@ class StreamBroadcaster:
 # Start the single broadcast
 broadcaster = StreamBroadcaster()
 broadcaster.start()
+
+def stream_simple():
+    first_open = True
+    track_over = False
+
+    while True:
+        if check_for_live():
+            logger.info("Live stream detected, switching")
+            break
+        else:
+            current, track_id, mp3_path, elapsed, byterate, duration = get_current()
+            start_chunk = round(elapsed * byterate)
+            
+            logger.info(current)
+            logger.info(f'START CHUNK: {start_chunk}')
+            logger.info(f'elapsed: {elapsed}')
+            logger.info(f'duration: {duration}')
+            logger.info(f'total chunks: {round(duration * byterate)}')
+            
+            last_check_for_current = time.time()
+
+            if first_open or track_over:
+
+                with open(mp3_path, 'rb') as f:
+                    first_open = False
+
+                    f.seek(start_chunk)
+                    while chunk := f.read(1024): # while there are chunks in current mp3
+
+                        if (time.time() - last_check_for_current >= 5): # keep tabs on elapsed vs duration every 5 sec or so
+                            _, _, _, elapsed_check, _, _ = get_current() 
+                            last_check_for_current = time.time()
+                            if (duration - elapsed_check) <= 1: # if end of track, break
+                                track_over = True
+                                break
+                            
+                        yield chunk
+        time.sleep(1)
 
 # ============================================================================
 # FLASK ROUTES
