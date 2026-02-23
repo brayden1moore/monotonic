@@ -108,7 +108,7 @@ def refresh_archive_dict():
                 data = json.load(f)
                 data['genre_string'] = ', '.join(data['genres'])
                 archive_id = data['id']
-                if data['show'] == 'c':
+                if data['show'] == 'c' and "-2" in data['title']:
                     data['title'] = ' - '.join(data['title'].split(' - ')[:-1])
                 data['download'] = 'https://scudbucket.sfo3.cdn.digitaloceanspaces.com/monotonic-radio/' + data['filename']
                 logger.info(f"{ARCHIVE_PATH}/{data['filename']}")
