@@ -1316,11 +1316,6 @@ function showPage(page) {
         episode.style.display = 'flex';
         episode.classList.add('fade-in-element');
     });
-
-    window.scrollTo({
-      top: document.getElementById('archive-paginator').getBoundingClientRect().top + window.pageYOffset - 580,
-      behavior: "smooth"
-    });
 }
 
 // Handle pagination clicks
@@ -1330,6 +1325,7 @@ document.querySelectorAll('.page').forEach(pageBtn => {
         document.querySelectorAll('.page').forEach(btn => btn.classList.remove('active-page'));
         this.classList.add('active-page');
         showPage(page);
+        goToArchive();
     });
 });
 
