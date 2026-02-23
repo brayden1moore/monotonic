@@ -408,6 +408,43 @@ def stream_playlist(chunk_size, chunks_between_checks, skip_track_id=None):
     finally:
         cleanup_process(process)
 
+def stream_simple():
+    first_open = True
+    track_over = False
+
+    while True:
+        if check_for_live():
+            logger.info("Live stream detected, switching")
+            break
+        else:
+            current, track_id, mp3_path, elapsed, byterate, duration = get_current()
+            start_chunk = round(elapsed * byterate)
+            
+            logger.info(current)
+            logger.info(f'START CHUNK: {start_chunk}')
+            logger.info(f'elapsed: {elapsed}')
+            logger.info(f'duration: {duration}')
+            logger.info(f'total chunks: {round(duration * byterate)}')
+            
+            last_check_for_current = time.time()
+
+            if first_open or track_over:
+
+                with open(mp3_path, 'rb') as f:
+                    first_open = False
+
+                    f.seek(start_chunk)
+                    while chunk := f.read(1024): # while there are chunks in current mp3
+
+                        if (time.time() - last_check_for_current >= 5): # keep tabs on elapsed vs duration every 5 sec or so
+                            _, _, _, elapsed_check, _, _ = get_current() 
+                            last_check_for_current = time.time()
+                            if (duration - elapsed_check) <= 1: # if end of track, break
+                                track_over = True
+                                break
+                            
+                        yield chunk
+        time.sleep(1)
 
 class StreamBroadcaster:
     def __init__(self):
@@ -428,7 +465,7 @@ class StreamBroadcaster:
                     stream_generator = stream_live(live_info, CHUNK_SIZE, CHUNKS_BETWEEN_CHECKS)
                     logger.info('Switching to Live')
                 else:
-                    stream_generator = stream_playlist(CHUNK_SIZE, CHUNKS_BETWEEN_CHECKS, skip_track_id=last_track_id)  # <-- pass it
+                    stream_generator = stream_simple()
                     logger.info('Switching to Archive')
 
                 for chunk in stream_generator:
@@ -467,39 +504,6 @@ class StreamBroadcaster:
         """Client disconnected"""
         with self.lock:
             self.clients.discard(client_queue)
-
-def stream_simple():
-    first_open = True
-    track_over = False
-
-    while True:
-        current, track_id, mp3_path, elapsed, byterate, duration = get_current()
-        start_chunk = round(elapsed * byterate)
-        
-        logger.info(current)
-        logger.info(f'START CHUNK: {start_chunk}')
-        logger.info(f'elapsed: {elapsed}')
-        logger.info(f'duration: {duration}')
-        logger.info(f'total chunks: {round(duration * byterate)}')
-        
-        last_check_for_current = time.time()
-
-        if first_open or track_over:
-
-            with open(mp3_path, 'rb') as f:
-                first_open = False
-
-                f.seek(start_chunk)
-                while chunk := f.read(1024): # while there are chunks in current mp3
-                    if (time.time() - last_check_for_current >= 5): # first keep tabs on elapsed vs duration every 5 sec or so
-                        _, _, _, elapsed_check, _, _ = get_current() 
-                        last_check_for_current = time.time()
-                        if (duration - elapsed_check) <= 1: # if end of track, break
-                            track_over = True
-                            break
-                    yield chunk
-        
-        time.sleep(1)
 
 
 # Start the single broadcast
