@@ -469,13 +469,14 @@ class StreamBroadcaster:
             self.clients.discard(client_queue)
 
 def stream_simple():
-    current, track_id, mp3_path, elapsed, bitrate, duration = get_current()
-    start_chunk = round(elapsed * bitrate)
+    current, track_id, mp3_path, elapsed, byterate, duration = get_current()
+    start_chunk = round(elapsed * byterate)
     
     logger.info(current)
     logger.info(f'START CHUNK: {start_chunk}')
     logger.info(f'elapsed: {elapsed}')
     logger.info(f'duration: {duration}')
+    logger.info(f'total chunks: {duration * byterate}')
     
     with open(mp3_path, 'rb') as f:
         f.seek(start_chunk)
