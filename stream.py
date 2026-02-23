@@ -279,7 +279,7 @@ def get_current():
             byterate = v['bitrate'] / 8
             mp3_path = ARCHIVE_PATH + '/' + v['filename']
             
-            return v['title'], archive_id, mp3_path, archive_elapsed, byterate
+            return v['title'], archive_id, mp3_path, archive_elapsed, byterate, v['duration']
         
         time_sum += v['duration']
     
@@ -339,7 +339,7 @@ def stream_playlist(chunk_size, chunks_between_checks, skip_track_id=None):
         time.sleep(1)
         return
 
-    current_video, track_id, mp3_path, video_elapsed, bitrate = current_result
+    current_video, track_id, mp3_path, video_elapsed, bitrate, duration = current_result
 
     if track_id == skip_track_id:
         logger.info(f"Still on finished track {track_id}, waiting for next...")
@@ -347,7 +347,7 @@ def stream_playlist(chunk_size, chunks_between_checks, skip_track_id=None):
         current_result = get_current()
         if not current_result:
             return
-        current_video, track_id, mp3_path, video_elapsed, bitrate = current_result
+        current_video, track_id, mp3_path, video_elapsed, bitrate, duration = current_result
     
     if not os.path.exists(mp3_path):
         logger.warning(f"File not found: {mp3_path}")
@@ -389,7 +389,7 @@ def stream_playlist(chunk_size, chunks_between_checks, skip_track_id=None):
                 # Check if track changed
                 new_result = get_current()
                 if new_result:
-                    new_video, new_id, _, _, _ = new_result
+                    new_video, new_id, _, _, _, _ = new_result
                     if new_id != track_id:
                         logger.info(f"Track switch: {track_id} -> {new_id}")
                         break
@@ -469,12 +469,13 @@ class StreamBroadcaster:
             self.clients.discard(client_queue)
 
 def stream_simple():
-    current, track_id, mp3_path, elapsed, bitrate = get_current()
+    current, track_id, mp3_path, elapsed, bitrate, duration = get_current()
     start_chunk = round(elapsed * bitrate)
     
     logger.info(current)
     logger.info(f'START CHUNK: {start_chunk}')
     logger.info(f'elapsed: {elapsed}')
+    logger.info(f'duration: {duration}')
     
     with open(mp3_path, 'rb') as f:
         f.seek(start_chunk)
@@ -581,7 +582,7 @@ def get_info():
     if not result:
         return {'error': 'Stream not ready'}, 503
     
-    current, archive_id, mp3_path, video_elapsed, byterate = result
+    current, archive_id, mp3_path, video_elapsed, byterate, duration = result
     
     return {
         'now_playing': current,
