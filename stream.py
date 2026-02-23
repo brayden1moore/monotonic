@@ -541,7 +541,7 @@ def stream():
     )
 
 @app.route('/stream-test')
-def stream():
+def stream_test():
     """Clients tune in to the broadcast"""
 
     return Response(
