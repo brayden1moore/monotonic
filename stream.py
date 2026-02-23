@@ -470,6 +470,7 @@ class StreamBroadcaster:
 
 def stream_simple():
     first_open = True
+    track_over = False
 
     while True:
         current, track_id, mp3_path, elapsed, byterate, duration = get_current()
