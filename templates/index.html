@@ -1333,7 +1333,7 @@ document.querySelector('.page[data-page="1"]')?.classList.add('active-page');
 
 document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.episode-seeker').forEach(seeker => {
-        seeker.addEventListener('click', function(e) {
+        seeker.addEventListener('mousedown', function(e) {
             const episode = this.closest('.episode');
             const audio = episode.querySelector('audio');
             const progress = this.querySelector('.episode-seeker-progress');
