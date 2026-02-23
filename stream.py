@@ -469,19 +469,28 @@ class StreamBroadcaster:
             self.clients.discard(client_queue)
 
 def stream_simple():
-    current, track_id, mp3_path, elapsed, byterate, duration = get_current()
-    start_chunk = round(elapsed * byterate)
-    
-    logger.info(current)
-    logger.info(f'START CHUNK: {start_chunk}')
-    logger.info(f'elapsed: {elapsed}')
-    logger.info(f'duration: {duration}')
-    logger.info(f'total chunks: {duration * byterate}')
-    
-    with open(mp3_path, 'rb') as f:
-        f.seek(start_chunk)
-        while chunk := f.read(1024):
-            yield chunk
+
+    while True:
+        current, track_id, mp3_path, elapsed, byterate, duration = get_current()
+        start_chunk = round(elapsed * byterate)
+        
+        logger.info(current)
+        logger.info(f'START CHUNK: {start_chunk}')
+        logger.info(f'elapsed: {elapsed}')
+        logger.info(f'duration: {duration}')
+        logger.info(f'total chunks: {round(duration * byterate)}')
+        
+        last_check_for_current = time.time()
+
+        with open(mp3_path, 'rb') as f:
+            f.seek(start_chunk)
+            while chunk := f.read(1024): # while there are chunks in current mp3
+                if (time.time() - last_check_for_current >= 5): # first keep tabs on elapsed vs duration every 5 sec or so
+                    _, _, _, elapsed_check, _, _ = get_current() 
+                    last_check_for_current = time.time()
+                    if (duration - elapsed_check) <= 1: # if end of track, break
+                        break
+                yield chunk # yield chunks
 
 
 # Start the single broadcast
