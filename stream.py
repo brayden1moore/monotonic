@@ -481,7 +481,6 @@ def stream_simple():
                                 break
                             
                         yield chunk
-                        time.sleep(1)
                         
         time.sleep(3)
 
