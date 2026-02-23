@@ -576,9 +576,7 @@ def index():
     genres = ', '.join(archive_dict[archive_id]['genres'])
     description = archive_dict[archive_id]['description'].replace('\n', '<br>')
     
-    all_episodes = [val for _,val in archive_dict.items()]
-    random.shuffle(all_episodes)
-    remaining_after_first = len(all_episodes) - 9
+    all_episodes = sorted(archive_dict.values(), key=lambda d: d['date'], reverse=True)
     pages = (len(all_episodes) // 9) + 1
 
     return render_template(
@@ -680,7 +678,7 @@ def get_user_episodes(user_shows):
         if val['show'] in user_shows:
             val['genre_string'] = ', '.join(val['genres'])
             user_episodes.append(val)    
-    user_episodes = sorted(user_episodes, key=lambda d: d['title'])
+    user_episodes = sorted(user_episodes, key=lambda d: d['date'], reverse=True)
     return user_episodes
 
 @app.route('/upload', methods=['GET', 'POST'])
@@ -696,6 +694,8 @@ def upload():
     if request.method == 'GET':
         if episode_to_edit:
             editing = archive_dict[episode_to_edit]
+            if 'date' not in editing.keys():
+                editing['date'] = ''
             return render_template('upload.html', shows=user_shows, episodes=user_episodes, editing=editing)
         else:
             return render_template('upload.html', shows=user_shows, episodes=user_episodes)
@@ -707,6 +707,7 @@ def upload():
     genres = request.form.get('genres')
     mp3_file = request.files.get('mp3')
     thumbnail_file = request.files.get('thumbnail')
+    show_date = request.form.get('date')
 
     editing_id = request.form.get('id')
     
@@ -715,7 +716,7 @@ def upload():
         return render_template('upload.html', shows=user_shows, error='You do not have permission to upload to this show', episodes=user_episodes)
     
     # Validate all fields
-    if not all([show, title, tracklist, genres, mp3_file, thumbnail_file]):
+    if not all([show, title, tracklist, genres, mp3_file, thumbnail_file, show_date]):
         if not editing_id:
             return render_template('upload.html', shows=user_shows, error='All fields are required', episodes=user_episodes)
     
@@ -767,7 +768,8 @@ def upload():
         'duration': duration,
         'thumbnail': thumb_path,
         'filepath': mp3_path,
-        'filename': mp3_filename
+        'filename': mp3_filename,
+        'date': show_date
     }
     filename = f"{id}.json"
     with open(f'data/{filename}', 'w') as f:

@@ -38,6 +38,9 @@
                 <option {% if editing and editing.show == 'r' %}selected{% endif %} value="r">Reading For Now</option>
                 {% endif %}
             </select><br>
+
+            Date<br>
+            <input type="date" name="date" value="{% if editing %}{{ editing.date }}{% endif %}" required>
             
             Title<br>
             <input id="title-input" name="title" value="{% if editing %}{{ editing.title }}{% endif %}" required><br>
