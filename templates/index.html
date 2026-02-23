@@ -1325,7 +1325,11 @@ document.querySelectorAll('.page').forEach(pageBtn => {
         document.querySelectorAll('.page').forEach(btn => btn.classList.remove('active-page'));
         this.classList.add('active-page');
         showPage(page);
-        goToArchive();
+        
+        window.scrollTo({
+          top: document.getElementById('archive-paginator').getBoundingClientRect().top + window.pageYOffset - 1080,
+          behavior: "smooth"
+        });
     });
 });
 
