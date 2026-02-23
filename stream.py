@@ -619,7 +619,8 @@ def index():
 
 @app.route('/stream')
 def stream():
-    """Clients tune in to the broadcast"""
+   
+   '''
     client_queue = broadcaster.add_client()
     
     def generate():
@@ -630,10 +631,9 @@ def stream():
         except:
             pass
         finally:
-            broadcaster.remove_client(client_queue)
-    
-    return Response(
-        generate(),
+            broadcaster.remove_client(client_queue)'''
+   return Response(
+        stream_simple(),
         mimetype='audio/mpeg',
         headers={
             'Cache-Control': 'no-cache, no-store, must-revalidate',
