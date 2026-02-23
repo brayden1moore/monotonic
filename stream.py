@@ -469,6 +469,7 @@ class StreamBroadcaster:
             self.clients.discard(client_queue)
 
 def stream_simple():
+    first_open = True
 
     while True:
         current, track_id, mp3_path, elapsed, byterate, duration = get_current()
@@ -482,15 +483,20 @@ def stream_simple():
         
         last_check_for_current = time.time()
 
-        with open(mp3_path, 'rb') as f:
-            f.seek(start_chunk)
-            while chunk := f.read(1024): # while there are chunks in current mp3
-                if (time.time() - last_check_for_current >= 5): # first keep tabs on elapsed vs duration every 5 sec or so
-                    _, _, _, elapsed_check, _, _ = get_current() 
-                    last_check_for_current = time.time()
-                    if (duration - elapsed_check) <= 1: # if end of track, break
-                        break
-                yield chunk
+        if first_open or track_over:
+
+            with open(mp3_path, 'rb') as f:
+                first_open = False
+
+                f.seek(start_chunk)
+                while chunk := f.read(1024): # while there are chunks in current mp3
+                    if (time.time() - last_check_for_current >= 5): # first keep tabs on elapsed vs duration every 5 sec or so
+                        _, _, _, elapsed_check, _, _ = get_current() 
+                        last_check_for_current = time.time()
+                        if (duration - elapsed_check) <= 1: # if end of track, break
+                            track_over = True
+                            break
+                    yield chunk
         
         time.sleep(1)
 
