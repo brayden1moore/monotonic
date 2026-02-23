@@ -547,7 +547,7 @@ class StreamBroadcaster:
 broadcaster = StreamBroadcaster()
 broadcaster.start()
 
-def stream_simple():
+def stream_simple_2():
     first_open = True
     track_over = False
 
