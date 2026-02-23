@@ -414,6 +414,7 @@ BUFFER_SECONDS = 4
 def stream_simple():
     first_open = True
     track_over = False
+    need_to_switch_to_archive = False
 
     while True:
 
@@ -452,6 +453,8 @@ def stream_simple():
                     break
                 
                 yield chunk
+            
+            need_to_switch_to_archive = True
             break
 
         else:
@@ -466,7 +469,9 @@ def stream_simple():
             
             last_check_for_current = time.time()
 
-            if first_open or track_over:
+            if first_open or track_over or need_to_switch_to_archive:
+
+                need_to_switch_to_archive = False
                 with open(mp3_path, 'rb') as f:
                     f.seek(start_chunk)
                     
