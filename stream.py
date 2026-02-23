@@ -471,8 +471,9 @@ class StreamBroadcaster:
 def stream_simple():
     current, track_id, mp3_path, elapsed, bitrate = get_current()
 
+    start_chunk = elapsed * bitrate
     with open(mp3_path, 'rb') as f:
-        chunk = f.read(1024)
+        chunk = f.read(start_chunk)
         while chunk:
             yield chunk
             chunk = f.read(1024)
