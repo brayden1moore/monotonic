@@ -469,45 +469,27 @@ class StreamBroadcaster:
             self.clients.discard(client_queue)
 
 def stream_simple():
+
     while True:
         current, track_id, mp3_path, elapsed, byterate, duration = get_current()
-        
-        # If we're already near the end, wait for track to advance
-        if duration - elapsed <= 2:
-            logger.info(f'Near end of track ({duration - elapsed:.1f}s left), waiting...')
-            time.sleep(2)
-            continue
-        
         start_chunk = round(elapsed * byterate)
-        end_chunk = round(duration * byterate)
         
         logger.info(current)
         logger.info(f'START CHUNK: {start_chunk}')
-        logger.info(f'elapsed: {elapsed}, duration: {duration}')
-        logger.info(f'total chunks: {end_chunk}')
+        logger.info(f'elapsed: {elapsed}')
+        logger.info(f'duration: {duration}')
+        logger.info(f'total chunks: {round(duration * byterate)}')
         
-        last_check = time.time()
-        
+        last_check_for_current = time.time()
+
         with open(mp3_path, 'rb') as f:
             f.seek(start_chunk)
-            bytes_read = start_chunk
-            while chunk := f.read(1024):
-                bytes_read += 1024
-                
-                # Check if we've read up to where the track should end
-                if bytes_read >= end_chunk:
-                    logger.info('Reached end of track by byte count, switching...')
-                    break
-                
-                # Also periodically verify via get_current as a safety net
-                if time.time() - last_check >= 5:
-                    _, _, _, elapsed_check, _, _ = get_current()
-                    last_check = time.time()
-                    logger.info(f'elapsed check: {elapsed_check:.1f} / {duration:.1f}')
-                    if duration - elapsed_check <= 1:
-                        logger.info('End of track confirmed via elapsed check, switching...')
+            while chunk := f.read(1024): # while there are chunks in current mp3
+                if (time.time() - last_check_for_current >= 5): # first keep tabs on elapsed vs duration every 5 sec or so
+                    _, _, _, elapsed_check, _, _ = get_current() 
+                    last_check_for_current = time.time()
+                    if (duration - elapsed_check) <= 1: # if end of track, break
                         break
-                
                 yield chunk
         
         time.sleep(1)
