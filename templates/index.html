@@ -1209,7 +1209,7 @@ function getUpdatedInfo() {
             const remainingTime = Number(json['duration']) - Number(json['elapsed']);
             const endTime = new Date();
             endTime.setSeconds(endTime.getSeconds() + remainingTime);
-            nowPlaying.innerHTML = json['now_playing'] + '<span style="font-family:Archivo Regular;"><span class="enter"><br></span><span class="dash"> - </span>(Re-Run) - Until ' +  endTime.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true }) + '</span>';
+            nowPlaying.innerHTML = json['now_playing'] + '<span class="enter"><br></span><span class="dash"> - </span><span style="font-family:Archivo Regular;">(Re-Run) - Until ' +  endTime.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true }) + '</span>';
             
             const archiveText = "&nbsp;&nbsp;While we're offline, please enjoy Monotonic's digital archive selection.".repeat(10)
             if (showText) showText.innerHTML = archiveText;
