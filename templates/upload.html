@@ -37,6 +37,9 @@
                 {% if 'r' in shows %}
                 <option {% if editing and editing.show == 'r' %}selected{% endif %} value="r">Reading For Now</option>
                 {% endif %}
+                {% if 's' in shows %}
+                <option {% if editing and editing.show == 's' %}selected{% endif %} value="s">Secret Broadcast</option>
+                {% endif %}                
             </select><br>
 
             Date<br>

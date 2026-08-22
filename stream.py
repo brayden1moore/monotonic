@@ -128,10 +128,10 @@ refresh_archive_dict()
 # Make users
 users = {
     os.environ.get('ADMIN_PASS', 'test'): {
-        'shows':['a','c','r'],
+        'shows':['a','c','r','s'],
     },
     os.environ.get('AB_PASS', 'testmiles'): {
-        'shows':['a']
+        'shows':['a','s']
     },
     os.environ.get('RFN_PASS', 'testflynn'): {
         'shows':['r']
