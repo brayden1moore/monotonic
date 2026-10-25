@@ -11,7 +11,7 @@ import queue
 import logging
 import collections 
 from datetime import datetime
-from flask import Flask, request, Response, redirect, render_template, session as flask_session
+from flask import Flask, request, Response, redirect, render_template, send_from_directory, abort, session as flask_session
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 
@@ -110,7 +110,9 @@ def refresh_archive_dict():
                 archive_id = data['id']
                 if data['show'] == 'c' and "-2" in data['title']:
                     data['title'] = ' - '.join(data['title'].split(' - ')[:-1])
-                data['download'] = 'https://scudbucket.sfo3.cdn.digitaloceanspaces.com/monotonic-radio/' + data['filename']
+                # Served from this server's own copy (see /archive/<file>), so
+                # playback doesn't depend on the Spaces CDN being reachable.
+                data['download'] = '/archive/' + data['filename']
                 logger.info(f"{ARCHIVE_PATH}/{data['filename']}")
                 if os.path.exists(f"{ARCHIVE_PATH}/{data['filename']}"):
                     archive_dict[archive_id] = data
@@ -673,6 +675,15 @@ def stream():
         }
     )
 
+@app.route('/archive/<path:filename>')
+def archive_file(filename):
+    """An episode MP3 from the local archive. Supports range requests, so
+    players can seek. send_from_directory refuses paths outside ARCHIVE_PATH."""
+    if not filename.lower().endswith('.mp3'):
+        abort(404)
+    return send_from_directory(ARCHIVE_PATH, filename, mimetype='audio/mpeg', conditional=True)
+
+
 @app.route('/info')
 def get_info():
     """API endpoint for current track info"""
@@ -706,7 +717,7 @@ def get_info():
         'byterate': byterate,
         'thumbnail': get_thumbnail(archive_id),
         'id':archive_id,
-        'download':f'https://scudbucket.sfo3.cdn.digitaloceanspaces.com/monotonic-radio/{mp3_path.split('/')[-1]}',
+        'download': '/archive/' + os.path.basename(mp3_path),
         'source': 'archive'
     }
 
