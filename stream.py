@@ -164,7 +164,12 @@ def cleanup_process(process):
 def get_thumbnail(archive_id):
     """Get thumbnail path for an archive, with fallback"""
     thumbnail = archive_dict[archive_id]['thumbnail']
-    
+
+    # Uploaded thumbnails live only on this server's disk; if one is gone,
+    # show the station image rather than an empty frame.
+    if thumbnail.startswith('assets') and not os.path.exists(thumbnail):
+        return 'assets/mtr.jpg'
+
     if 'assets/thumbnail' not in thumbnail:
         local_path = f'assets/thumbnails/{archive_id}.webp'
         if os.path.exists(local_path):
@@ -247,46 +252,60 @@ def save_new_archive(archive_data):
 # PLAYLIST & PLAYBACK LOGIC
 # ============================================================================
 
+SCHEDULE_PATH = 'schedule.json'   # gitignored (*.json)
+_schedule = None
+_schedule_lock = threading.Lock()
+
+
+def _pick_next(recent):
+    """Random episode not played recently (roughly the last half of the catalog)."""
+    pool = [a for a in archives if a not in recent] or list(archives)
+    return random.choice(pool)
+
+
 def get_current():
-    """Get currently playing track based on elapsed time - deterministic calculation"""
-    current_time = datetime.now()
-    elapsed_seconds = (current_time - BEGINNING_TIME).total_seconds()
-    
-    # Calculate which iteration we're in
-    iteration = int(elapsed_seconds // total_duration)
-    time_into_iteration = elapsed_seconds % total_duration
-    
-    # Generate shuffled order for this iteration
-    shuffled = archives.copy()
-    random.Random(iteration).shuffle(shuffled)
-    
-    # Avoid back-to-back repeats across iterations
-    if iteration > 0:
-        prev_shuffled = archives.copy()
-        random.Random(iteration - 1).shuffle(prev_shuffled)
-        
-        attempt = 0
-        while shuffled[0] == prev_shuffled[-1] and attempt < 100:
-            random.Random(iteration * 1000 + attempt).shuffle(shuffled)
-            attempt += 1
-    
-    # Find which track we're currently in
-    time_sum = 0
-    for i, archive_id in enumerate(shuffled):
+    """
+    What's on air now. The schedule is one persisted pointer (track + start
+    time) that only ever moves forward, one track at a time. Uploads and edits
+    just make a new episode eligible for a future pick; they never reshuffle
+    what is playing (the old shuffle-of-everything did, so the stream and
+    /info could disagree after any upload).
+    """
+    global _schedule
+    with _schedule_lock:
+        if not archives:
+            return None
+        if _schedule is None:
+            try:
+                with open(SCHEDULE_PATH) as f:
+                    _schedule = json.load(f)
+            except (OSError, ValueError):
+                _schedule = None
+        changed = False
+        now = time.time()
+        if not _schedule or _schedule.get('track') not in archive_dict:
+            _schedule = {'track': _pick_next([]), 'start': now, 'recent': []}
+            changed = True
+        # Walk forward past every track that has finished (also catches up
+        # after downtime).
+        while now - _schedule['start'] >= archive_dict[_schedule['track']]['duration']:
+            _schedule['start'] += archive_dict[_schedule['track']]['duration']
+            recent = (_schedule.get('recent', []) + [_schedule['track']])[-max(1, len(archives) // 2):]
+            _schedule['recent'] = recent
+            _schedule['track'] = _pick_next(recent)
+            changed = True
+        if changed:
+            try:
+                with open(SCHEDULE_PATH, 'w') as f:
+                    json.dump(_schedule, f)
+            except OSError as e:
+                logger.error(f"Couldn't save schedule: {e}")
+
+        archive_id = _schedule['track']
         v = archive_dict[archive_id]
-        
-        if time_sum + v['duration'] > time_into_iteration:
-            # Found the current track
-            archive_elapsed = time_into_iteration - time_sum
-            byterate = v['bitrate'] / 8
-            mp3_path = ARCHIVE_PATH + '/' + v['filename']
-            
-            return v['title'], archive_id, mp3_path, archive_elapsed, byterate, v['duration']
-        
-        time_sum += v['duration']
-    
-    logger.warning("Reached end of iteration without finding track")
-    return None
+        elapsed = now - _schedule['start']
+        mp3_path = ARCHIVE_PATH + '/' + v['filename']
+        return v['title'], archive_id, mp3_path, elapsed, v['bitrate'] / 8, v['duration']
 
 # ============================================================================
 # STREAMING LOGIC
@@ -442,26 +461,38 @@ def stream_simple():
                 bufsize=CHUNK_SIZE
             )
             
-            chunk_count = 0
-            while True:
-                chunk_count += 1
-                
-                if chunk_count % CHUNKS_BETWEEN_CHECKS == 0:
-                    if not check_for_live():
-                        logger.info("Live stream ended, switching back to playlist")
+            try:
+                chunk_count = 0
+                while True:
+                    chunk_count += 1
+
+                    if chunk_count % CHUNKS_BETWEEN_CHECKS == 0:
+                        if not check_for_live():
+                            logger.info("Live stream ended, switching back to playlist")
+                            break
+
+                    chunk = process.stdout.read(CHUNK_SIZE)
+                    if not chunk:
+                        logger.warning("Live stream ended unexpectedly")
                         break
-                
-                chunk = process.stdout.read(CHUNK_SIZE)
-                if not chunk:
-                    logger.warning("Live stream ended unexpectedly")
-                    break
-                
-                yield chunk
-            
+
+                    yield chunk
+            finally:
+                # Runs on listener disconnect too (GeneratorExit), so mpv never leaks.
+                cleanup_process(process)
+
             break
 
         else:
-            current, track_id, mp3_path, elapsed, byterate, duration = get_current()
+            current_result = get_current()
+            if not current_result:
+                time.sleep(1)
+                continue
+            current, track_id, mp3_path, elapsed, byterate, duration = current_result
+            if not os.path.exists(mp3_path):
+                logger.warning(f"File not found, waiting for next track: {mp3_path}")
+                time.sleep(5)
+                continue
             start_chunk = round(elapsed * byterate)
             
             logger.info(current)
@@ -482,25 +513,48 @@ def stream_simple():
                     prebuffer = f.read(int(byterate * BUFFER_SECONDS))
                     yield prebuffer
                     
-                    # now pace the rest at real playback speed
+                    # Pace the rest against the wall clock. Sleeping a fixed
+                    # 1024/byterate after every chunk ignored the time spent
+                    # doing everything else, so listeners fell further behind
+                    # the schedule as a track went on (and /info showed the
+                    # next episode while the old one was still audible).
                     live_detected = False
+                    track_over = False
+                    paced_from = time.time()
+                    sent = 0
+                    last_live_check = time.time()
                     while chunk := f.read(1024):
                         yield chunk
-                        time.sleep(1024 / byterate)
+                        sent += len(chunk)
+                        delay = paced_from + sent / byterate - time.time()
+                        if delay > 0:
+                            time.sleep(delay)
 
-                        if (time.time() - last_check_for_current >= 5):
-                            _, _, _, elapsed_check, _, _ = get_current()
+                        # Follow the schedule: switch the moment it moves on.
+                        if time.time() - last_check_for_current >= 2:
                             last_check_for_current = time.time()
-                            if (duration - elapsed_check) <= 1:
+                            now_result = get_current()
+                            if now_result and now_result[1] != track_id:
                                 track_over = True
                                 break
+                        if time.time() - last_live_check >= 5:
+                            last_live_check = time.time()
                             if check_for_live():
                                 live_detected = True
                                 break
-                    
+
                     if live_detected:
-                        break
-                        
+                        return     # as before: end this stream; the player reconnects to live
+
+                    if track_over:
+                        continue   # straight into the next track, no gap
+
+                    # Reached the end of the file a little before the
+                    # schedule did: wait for it instead of replaying.
+                    while (r := get_current()) and r[1] == track_id:
+                        time.sleep(0.5)
+                    continue
+
         time.sleep(3)
 
 class StreamBroadcaster:
@@ -800,4 +854,4 @@ def upload():
 get_current()
 
 if __name__ == '__main__':
-    app.run(debug=True, port=8888, threaded=True)
+    app.run(debug=False, port=8888, threaded=True)
