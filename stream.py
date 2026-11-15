@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 app = Flask(__name__, template_folder='templates', static_folder='assets')
 app.secret_key = os.environ.get('SECRET_KEY', 'orange-trench')
-app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024  # 100MB
+app.config['MAX_CONTENT_LENGTH'] = 1000 * 1024 * 1024  # 100MB
 CORS(app)
 
 try:
